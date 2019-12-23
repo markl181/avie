@@ -17,6 +17,8 @@ Bootstrap4::menu($menu, basename(__FILE__));
  * and store it on the server, then daily parse it for ingredients and store that in the DB
  * even if we have to do this manually it's ok
  *
+ * Reorder code once all updates are done so we only check the deltas
+ *
  *
  * 0 - title
  * 1 - course

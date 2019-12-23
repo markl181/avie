@@ -22,23 +22,34 @@ $ingredient = $_GET['ingredient'];
 
 if($ingredient)
 {
+    $pattern = '/\(.*$/';
+    $ingredient = preg_replace($pattern,'',$ingredient);
+    $ingredient = trim($ingredient);
 
     $ingredient = "%$ingredient%";
 
     $pdo->query($sqlFilterRecipeByIngredient, ['binds'=>[$ingredient],'fetch'=>'all']);
 
+    $recipeList = $pdo->result;
+    $recipeCount = count($recipeList);
+
+    Bootstrap4::heading("Recipe List - Filtered ($recipeCount recipes)",2);
 
 }
 else
 {
     $pdo->query($sqlGetRecipes);
 
+    $recipeList = $pdo->result;
+    $recipeCount = count($recipeList);
+
+    Bootstrap4::heading("Recipe List ($recipeCount recipes)",2);
+
 }
 
-$recipeList = $pdo->result;
 
 
-Bootstrap4::heading('Food List',2);
+
 Bootstrap4::table(['Title','Course','Rating','Time (m)','Photo']);
 
 /*

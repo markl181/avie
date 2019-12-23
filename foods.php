@@ -8,8 +8,8 @@ $pageTitle = 'Avie - Foods';
 include 'header.php';
 
 /*
- * Make a food clickable?
- *
+ * Allow edit of food
+ *maybe we'll have to do kale (raw) and kale (cooked and I'll make the search ignore ()
  */
 
 Bootstrap4::menu($menu, basename(__FILE__));
@@ -66,6 +66,9 @@ $form->selectquery('level', 'Level:', $levelsList, 'name'
     , 'id',$level, ['autofocus'=>'autofocus']);
 $form->submit();
 $form->close();
+
+Bootstrap4::error_block("For best results, use the singular form of a food, e.g. almond not almonds"
+    ,'info');
 
 Bootstrap4::linebreak(2);
 Bootstrap4::heading('Food List',2);
