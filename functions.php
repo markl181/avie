@@ -1027,4 +1027,62 @@ function get_date($format, $date = '')
 
 }
 
+function parse_ingredient($ingredient)
+{
+    $ingredient = strtolower($ingredient);
+
+    $pattern = '/,.*$/';
+    $ingredient = preg_replace($pattern,'',$ingredient);
+
+    $pattern = '/[0-9]\/?[0-9]? cups?/i';
+    $ingredient = preg_replace($pattern,'',$ingredient);
+
+    $pattern = '/[0-9]\/?[0-9]? tsps?/i';
+    $ingredient = preg_replace($pattern,'',$ingredient);
+
+    $pattern = '/[0-9]\/?[0-9]? teaspoons?/i';
+    $ingredient = preg_replace($pattern,'',$ingredient);
+
+    $pattern = '/[0-9]\/?[0-9]? tbsps?/i';
+    $ingredient = preg_replace($pattern,'',$ingredient);
+
+    $pattern = '/[0-9]\/?[0-9]? tablespoons?/i';
+    $ingredient = preg_replace($pattern,'',$ingredient);
+
+    $pattern = '/[0-9]*.ounce/i';
+    $ingredient = preg_replace($pattern,'',$ingredient);
+
+    $pattern = '/[0-9]*.oz/i';
+    $ingredient = preg_replace($pattern,'',$ingredient);
+
+    $pattern = '/[0-9]*.ml/i';
+    $ingredient = preg_replace($pattern,'',$ingredient);
+
+    $pattern = '/[0-9]+.g /';
+    $ingredient = preg_replace($pattern,'',$ingredient);
+
+    $pattern = '/[0-9]* quarts?/i';
+    $ingredient = preg_replace($pattern,'',$ingredient);
+
+    $pattern = '/[0-9]* dash /i';
+    $ingredient = preg_replace($pattern,'',$ingredient);
+
+    $pattern = '/ can /i';
+    $ingredient = preg_replace($pattern,'',$ingredient);
+
+    $pattern = '/[^a-zA-Z ]/';
+    $ingredient = preg_replace($pattern,'',$ingredient);
+
+    $pattern = '/ {2,}/';
+    $ingredient = preg_replace($pattern,' ',$ingredient);
+
+    $ingredient = trim($ingredient);
+    $ingredient = ucwords($ingredient);
+
+    return $ingredient;
+
+
+}
+
+
 ?>

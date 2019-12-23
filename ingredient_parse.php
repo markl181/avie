@@ -10,7 +10,7 @@ include 'header.php';
 
 Bootstrap4::menu($menu, basename(__FILE__));
 
-
+//error_reporting(0);
 
 /*
  * Can we download a file say daily from https://www.plantoeat.com/recipes/export.csv
@@ -38,7 +38,7 @@ Bootstrap4::menu($menu, basename(__FILE__));
  */
 
 $fileName = 'plantoeat-recipes-358334_12-22-2019.csv';
-$rowLimit = 10000;
+$rowLimit = 5000;
 
 $file = fopen($fileName, 'r');
 
@@ -75,12 +75,13 @@ while (($data = fgetcsv($file, 10000, ",")) && $i <= $rowLimit)
 
         //initial processing
         $tags = explode(", ",$tags);
+        $ingredients = explode("\n",$ingredients);
         $publicId = str_ireplace('https://www.plantoeat.com/recipes/','',$publicUrl);
 
-        foreach($tags as $tag)
-        {
-            if($tag <> '')
-            {
+        $pdo->logFind = true;
+
+        foreach($tags as $tag) {
+            if($tag <> '') {
                 //check if the record already exists and insert it if not
                 $pdo->idColumn = 'id';
                 $pdo->searchColumn = 'name';
@@ -92,7 +93,58 @@ while (($data = fgetcsv($file, 10000, ",")) && $i <= $rowLimit)
                 $pdo->find_id();
                 $tagId = $pdo->recordId;
 
+                //check if the tag exists for the recipe
+                $pdo->query($sqlSelectRecipeTag, ['binds'=>[$publicId, $tagId], 'fetch'=>'one']);
+                $recipeTag = $pdo->result;
+
+                if(!$recipeTag)
+                {
+
+                    $pdo->query($sqlInsertRecipeTag, ['binds'=>[$publicId, $tagId], 'type'=>'insert']);
+                    echo "Recipe Tag Created for recipe $publicId<br/>";
+                }
+
+                //@@todo do we want to remove any tags that were removed?
+
             }
+        }
+
+        foreach ($ingredients as $ingredient)
+        {
+            if($ingredient <> '') {
+
+                //$ingredient = str_ireplace("1/2 cup","",$ingredient);
+                $ingredient = parse_ingredient($ingredient);
+
+                //check if the record already exists and insert it if not
+                $pdo->idColumn = 'id';
+                $pdo->searchColumn = 'name';
+                $pdo->searchTable = 'avie_ingredient';
+                $pdo->searchValue = $ingredient;
+                $pdo->insertQuery = $sqlInsertIngredient;
+                $pdo->insertBinds = [$ingredient];
+
+                $pdo->find_id();
+                $ingredientId = $pdo->recordId;
+
+                //check if the ingredient exists for the recipe
+                $pdo->query($sqlSelectRecipeIngredient, ['binds'=>[$publicId, $ingredientId], 'fetch'=>'one']);
+                $recipeIngredient = $pdo->result;
+
+                if(!$recipeIngredient)
+                {
+
+                    $pdo->query($sqlInsertRecipeIngredient, ['binds'=>[$publicId, $ingredientId], 'type'=>'insert']);
+                    echo "Recipe Ingredient Created for recipe $publicId<br/>";
+                }
+
+                //@@todo do we want to remove any ingredients that were removed?
+
+
+
+            }
+
+        }
 
             if($title <> '')
             {
@@ -107,10 +159,11 @@ while (($data = fgetcsv($file, 10000, ",")) && $i <= $rowLimit)
 
                     if($dbUpdatedAt <> $updatedAt)
                     {
-                        //process update
 
+                        $update = true;
 
                     }
+
 
                 }
                 else
@@ -123,22 +176,27 @@ while (($data = fgetcsv($file, 10000, ",")) && $i <= $rowLimit)
                         , $website, $prepTime, $cookTime, $servings, $yield, $rating, $publicUrl, $photo, $updatedAt]
                         , 'type'=>'insert']);
 
+                    echo "Recipe $publicId Created<br/>";
+
+                    $update = true;
 
                 }
+
+                if($update = true)
+                {
+                    //process update
+
+
+
+                    unset ($update);
+                }
+
 
 
             }
 
 
         }
-
-
-
-
-
-
-    }
-
 
 
 
@@ -151,6 +209,7 @@ fclose($file);
 
 
 
+include 'footer.php';
 
 
 

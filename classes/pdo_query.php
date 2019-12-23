@@ -84,6 +84,7 @@ class simple_pdo
 	public $recordId;
 	public $insertQuery;
 	public $insertBinds = [];
+	public $logFind = false;
 
 	/**
 	 * error_log_query function. Logs a query to a database table
@@ -346,6 +347,11 @@ class simple_pdo
         $this->query($this->insertQuery, ['binds'=>$this->insertBinds, 'type'=>'insert']);
 
         $this->recordId = $this->rowNum;
+        if($this->logFind === true)
+		{
+			echo $this->searchTable." record created for ".$this->searchValue."<br/>";
+
+		}
 
     }
 

@@ -16,18 +16,44 @@ include 'header.php';
 
 Bootstrap4::menu($menu, basename(__FILE__));
 
-$pdo->query($sqlGetRecipes);
+error_reporting(0);
+
+$ingredient = $_GET['ingredient'];
+
+if($ingredient)
+{
+
+    $ingredient = "%$ingredient%";
+
+    $pdo->query($sqlFilterRecipeByIngredient, ['binds'=>[$ingredient],'fetch'=>'all']);
+
+
+}
+else
+{
+    $pdo->query($sqlGetRecipes);
+
+}
+
 $recipeList = $pdo->result;
 
 
 Bootstrap4::heading('Food List',2);
 Bootstrap4::table(['Title','Course','Rating','Time (m)','Photo']);
 
+/*
+ * Add in course jumps
+ *
+ */
+
 foreach($recipeList as $recipe)
 {
     $recipe['time'] = $recipe['prep_time'] + $recipe['cook_time'];
     $recipe['title'] = "<a target='_blank' href='".$recipe['public_url']."'>".$recipe['title']."</a>";
     $recipe['photo'] = "<img height='50px' src='".$recipe['photo']."'/>";
+
+    $recipe['rating'] = ($recipe['rating'] == 0) ? '' : $recipe['rating'];
+    $recipe['time'] = ($recipe['time'] == 0) ? '' : $recipe['time'];
 
     Bootstrap4::table_row([
         $recipe['title'], $recipe['course'], $recipe['rating'], $recipe['time']

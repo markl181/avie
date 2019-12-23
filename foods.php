@@ -73,6 +73,8 @@ Bootstrap4::table(['Food','Level','Recipes']);
 
 foreach($foodListAr as $food)
 {
+    $food['name'] = "<a href='recipes.php?ingredient=".$food['name']."' target='_blank'>".$food['name']."</a>";
+
     Bootstrap4::table_row([$food['name'], $food['level'],'']);
 
 
