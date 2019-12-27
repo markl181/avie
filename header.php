@@ -20,6 +20,7 @@
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <script type="text/javascript" src="./js/jquery_addons.js"></script>
     <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
@@ -32,11 +33,7 @@ echo "<body class='plain'>";
 
 $ipList = ['127.0.0.1', '75.156.174.108', '::1'];
 
-$host = "markleci.com";
-//$host = 'localhost';
-$dbname = "markleci_food";
-$user = "markleci_food";
-$pass = "v%r0qC0dM2*2";
+require 'connect.php';
 
 
 error_reporting(E_ALL);

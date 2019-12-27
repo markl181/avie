@@ -7,17 +7,14 @@ $pageTitle = 'Avie - Foods';
 
 include 'header.php';
 
-/*
- * Allow edit of food
- *maybe we'll have to do kale (raw) and kale (cooked and I'll make the search ignore ()
- */
-
 Bootstrap4::menu($menu, basename(__FILE__));
 
 
 $today = get_date('Y-m-d');
 
 $level = '';
+$dbFood = '';
+$id = '';
 
 if(isset($_POST['submit']))
 {
@@ -27,22 +24,63 @@ if(isset($_POST['submit']))
     $food = ucwords($food);
     $level = filter_var($_POST['level'], FILTER_SANITIZE_NUMBER_INT
         );
+    $formId = filter_var($_POST['food_id'], FILTER_SANITIZE_NUMBER_INT
+    );
 
-    //check if the food already exists and insert it if not
-    $pdo->idColumn = 'id';
-    $pdo->searchColumn = 'name';
-    $pdo->searchTable = 'avie_food';
-    $pdo->searchValue = $food;
-    $pdo->insertQuery = $sqlInsertFood;
-    $pdo->insertBinds = [$food, $level];
+    if(!$formId)
+    {
+        //check if the food already exists and insert it if not
+        $pdo->idColumn = 'id';
+        $pdo->searchColumn = 'name';
+        $pdo->searchTable = 'avie_food';
+        $pdo->searchValue = $food;
+        $pdo->insertQuery = $sqlInsertFood;
+        $pdo->insertBinds = [$food, $level];
 
-    $pdo->find_id();
-    $foodId = $pdo->recordId;
+        $pdo->find_id();
+        $foodId = $pdo->recordId;
+
+    }
+    else
+    {
+        //update the existing food
+        $pdo->query($sqlGetFoodById, ['binds'=>[$formId], 'fetch'=>'one']);
+        $dbRow = $pdo->result;
+
+        $dbFood = $dbRow['name'];
+        $dbLevel = $dbRow['level'];
+
+        if($dbLevel <> $level || $dbFood <> $food)
+        {
+            //update the record
+            $sqlUpdateFood = "UPDATE avie_food SET name = ?, level_id = ? WHERE id = ?";
+
+            $pdo->query($sqlUpdateFood, ['binds'=>[$food, $level, $formId], 'type'=>'update']);
+
+        }
+
+
+    }
+
+
 
 
 
 }
 
+if(isset($_GET['id'])) {
+
+    $id = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT
+    );
+
+    $pdo->query($sqlGetFoodById, ['binds'=>[$id], 'fetch'=>'one']);
+    $dbRow = $pdo->result;
+
+    $dbFood = $dbRow['name'];
+    $level = $dbRow['level'];
+
+
+}
 
 $pdo->query($sqlGetFoods);
 $foodListAr = $pdo->result;
@@ -60,25 +98,32 @@ $levelsList = $pdo->result;
 
 $form->open();
 //$form->input('date','Date',['type'=>'date', 'value'=>$today]);
-$form->datalist_text('food','Food:','', $foodList);
-
+$form->datalist_text('food','Food:',$dbFood, $foodList);
+$form->hidden('food_id', $id);
 $form->selectquery('level', 'Level:', $levelsList, 'name'
     , 'id',$level, ['autofocus'=>'autofocus']);
 $form->submit();
 $form->close();
 
-Bootstrap4::error_block("For best results, use the singular form of a food, e.g. almond not almonds"
+Bootstrap4::error_block("For best results, use the singular form of a food, e.g. almond not almonds. Click a row 
+to edit"
     ,'info');
 
 Bootstrap4::linebreak(2);
 Bootstrap4::heading('Food List',2);
-Bootstrap4::table(['Food','Level','Recipes']);
+Bootstrap4::table(['Food','Level']);
+
+$rowClass = 'text-left clickable-row';
 
 foreach($foodListAr as $food)
 {
-    $food['name'] = "<a href='recipes.php?ingredient=".$food['name']."' target='_blank'>".$food['name']."</a>";
 
-    Bootstrap4::table_row([$food['name'], $food['level'],'']);
+    $url = $_SERVER['PHP_SELF'] . "?id=" . $food['id'];
+
+    $food['name'] = "<a href='recipes.php?ingredient=".$food['id']."' target='_blank'>".$food['name']."</a>";
+
+
+    Bootstrap4::table_row([$food['name'], $food['level']], ['class' => $rowClass, 'data-href' => $url]);
 
 
 }

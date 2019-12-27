@@ -18,8 +18,12 @@ ADD `timestamp` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMES
 
 $sqlGetMeals = "SELECT id, ord, name FROM meal ORDER BY ord";
 $sqlGetFoodGroups = "SELECT id, name, ord, notes FROM food_group ORDER BY ord";
-$sqlGetFoods = "SELECT avie_food.id, avie_food.name name, avie_level.name level FROM avie_food 
+$sqlGetFoods = "SELECT avie_food.id id, avie_food.name name, avie_level.name level FROM avie_food 
 LEFT OUTER JOIN avie_level ON avie_food.level_id = avie_level.id
+ORDER BY avie_food.name";
+$sqlGetFoodById = "SELECT avie_food.id, avie_food.name name, avie_level.id level FROM avie_food 
+LEFT OUTER JOIN avie_level ON avie_food.level_id = avie_level.id
+WHERE avie_food.id = ?
 ORDER BY avie_food.name";
 $sqlGetLevels = "SELECT id, name FROM avie_level ORDER BY id";
 
@@ -34,8 +38,8 @@ $sqlInsertRecipeIngredient = "INSERT INTO avie_recipe_ingredient (recipe_id, ing
 
 $sqlFilterRecipeByIngredient = "SELECT DISTINCT ar.* from avie_recipe ar
 INNER JOIN avie_recipe_ingredient ari ON ari.recipe_id = ar.public_id
-INNER JOIN avie_ingredient ai ON ai.id = ari.ingredient_id
-WHERE ai.name LIKE ?
+INNER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
+WHERE afi.food_id = ?
 ORDER BY ar.course, ar.title
 ";
 
@@ -43,5 +47,18 @@ $sqlGetRecipeByPublicId = "SELECT id, updated_at FROM avie_recipe WHERE public_i
 $sqlGetRecipes = "SELECT * from avie_recipe ORDER BY course, title";
 $sqlInsertRecipe = "INSERT INTO avie_recipe (public_id, title, course, main_ingredient, url, website, prep_time
 , cook_time, servings, yield, rating, public_url, photo, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
+$sqlGetRecipeIngredient = "SELECT DISTINCT ai.id, ai.name from avie_recipe ar
+INNER JOIN avie_recipe_ingredient ari ON ari.recipe_id = ar.public_id
+INNER JOIN avie_ingredient ai ON ai.id = ari.ingredient_id
+WHERE ai.name LIKE ? AND ai.timestamp >= ?
+ORDER BY ar.course, ar.title
+";
+
+$sqlGetIngredientTime = "SELECT MAX(timestamp) maxtime FROM avie_food_ingredient";
+
+
+$sqlGetFoodIngredient = "SELECT id FROM avie_food_ingredient WHERE food_id = ? AND ingredient_id = ?";
+$sqlInsertFoodIngredient = "INSERT INTO avie_food_ingredient (food_id, ingredient_id) VALUES (?,?)";
 
 ?>

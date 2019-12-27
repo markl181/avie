@@ -40,7 +40,7 @@ Bootstrap4::menu($menu, basename(__FILE__));
  */
 
 $fileName = 'plantoeat-recipes-358334_12-22-2019.csv';
-$rowLimit = 5000;
+$rowLimit = 50000;
 
 $file = fopen($fileName, 'r');
 

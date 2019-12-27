@@ -439,7 +439,7 @@ class Bootstrap4
      * @param mixed  $headers
      * @return void
      */
-    public static function table($headers, $class = 'table text-center table-striped table-sm table-hover')
+    public static function table($headers, $class = 'table text-left table-striped table-sm table-hover')
     {
         //get global size from bootstrap
         $size = self::$size;
@@ -876,14 +876,14 @@ class Bootstrap4
         }
         else
         {
-            echo "Copyright Mark Leci $founded-$year";
+            echo "Copyright Mark & Avie $founded-$year";
 
         }
 
         echo "<div class='text-center'>";
         echo "<div class='col-sm-12 text-center'>";
         echo "<br/>";
-        echo "<a href='https://github.com/markl181/random-tools' target='_blank'>Github</a><br/>";
+        echo "<a href='https://github.com/markl181/avie/issues' target='_blank'>Github</a><br/>";
         echo "</div>";
         echo "</div>";
 

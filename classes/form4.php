@@ -362,7 +362,8 @@ class form4
         $labelWidth = 4;
         $fieldSize = 5;
         $this->class = 'form-control';
-        $this->attributesArray = $attributesArray;
+
+        $valuesArray = [];
 
         echo "<div class='form-group align-items-center'>";
         echo "<div class='row'>";
@@ -373,7 +374,12 @@ class form4
         echo "<div class='col-sm-$fieldSize'>";
         echo "<select ";
 
-        $this->attributes();
+        if($attributesArray <> '')
+        {
+            $this->attributesArray = $attributesArray;
+            $this->attributes();
+
+        }
 
         echo " class = '$this->class'";
         echo " id='$name' name='$name'>";
@@ -399,6 +405,8 @@ class form4
 
         }
 
+
+
         foreach($valuesArray as $value => $text) {
             if($value == $selected) {
                 echo "<option selected='selected' value='$value'>$text</option>";
@@ -415,7 +423,7 @@ class form4
         $this->gutter($labelWidth, $fieldSize);
 
         //close form group
-            Bootstrap4::tag_close('div');
+        Bootstrap4::tag_close('div');
 
 
     }
