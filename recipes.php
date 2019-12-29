@@ -20,6 +20,42 @@ error_reporting(0);
 
 $ingredient = $_GET['ingredient'];
 $includes = $_GET['include'];
+$includeBlack = $_GET['includeblack'];
+$redLimit = $_GET['redlimit'];
+
+$redLimitClause =
+    "
+    AND ar.public_id NOT IN
+    (
+    SELECT DISTINCT ar.public_id
+FROM avie_food_ingredient afi
+INNER JOIN avie_recipe_ingredient ari ON ari.ingredient_id = afi.ingredient_id
+INNER JOIN avie_recipe ar ON ar.public_id = ari.recipe_id
+INNER JOIN avie_food af ON af.id = afi.food_id
+WHERE af.level_id = 5
+GROUP BY ar.public_id, ar.title
+HAVING COUNT(DISTINCT afi.food_id) > ?
+    
+    )
+    
+    ";
+
+$includeNoBlackClause = "
+ AND ar.id NOT IN
+(
+SELECT ar.id FROM
+avie_recipe ar 
+INNER JOIN avie_recipe_ingredient ari ON ari.recipe_id = ar.public_id
+INNER JOIN avie_food_ingredient afi ON ari.ingredient_id = afi.ingredient_id
+INNER JOIN avie_food af ON af.id = afi.food_id
+WHERE level_id = 4
+)
+
+";
+
+$sqlFinishOneInclude = " AND
+afi.food_id = ?
+ORDER BY ar.course, ar.title";
 
 if($ingredient)
 {
@@ -42,29 +78,62 @@ else if($includes)
 
     if($includeCount == 1)
     {
+        if($includeBlack != 1)
+        {
+            $sqlSearch = $sqlGetRecipesByInclude.$includeNoBlackClause;
 
-        $sqlGetRecipesByInclude = "
-SELECT DISTINCT ar.*
-FROM avie_food_ingredient afi
-INNER JOIN avie_recipe_ingredient ari ON ari.ingredient_id = afi.ingredient_id
-INNER JOIN avie_recipe ar ON ar.public_id = ari.recipe_id
-WHERE 
-afi.food_id = ?
-ORDER BY ar.course, ar.title
-";
+            if($redLimit > 0)
+            {
+                $sqlSearch .= $redLimitClause;
+                $sqlSearch .= $sqlFinishOneInclude;
+                $pdo->query($sqlSearch, ['binds'=>[$redLimit, $includes[0]]]);
+            }
+            else
+            {
+                $sqlSearch .= $sqlFinishOneInclude;
+                $pdo->query($sqlSearch, ['binds'=>[$includes[0]]]);
 
-        $pdo->query($sqlGetRecipesByInclude, ['binds'=>[$includes[0]]]);
+            }
+
+
+        }
+        else
+        {
+            $sqlSearch = $sqlGetRecipesByInclude;
+
+            if($redLimit > 0)
+            {
+                $sqlSearch .= $redLimitClause;
+                $sqlSearch .= $sqlFinishOneInclude;
+                $pdo->query($sqlSearch, ['binds'=>[$redLimit, $includes[0]]]);
+
+            }
+            else
+            {
+                $sqlSearch .= $sqlFinishOneInclude;
+                $pdo->query($sqlSearch, ['binds'=>[$includes[0]]]);
+            }
+
+
+        }
+
+
 
     }
     else
     {
+        //multiple includes
+        $firstInclude = " AND afi.food_id = ?";
 
-       $basesql = "SELECT DISTINCT ar.*
-FROM avie_food_ingredient afi
-INNER JOIN avie_recipe_ingredient ari ON ari.ingredient_id = afi.ingredient_id
-INNER JOIN avie_recipe ar ON ar.public_id = ari.recipe_id
-WHERE 
-afi.food_id = ?";
+        $sqlSearch = $sqlGetRecipesByInclude.$firstInclude;
+
+        if($includeBlack != 1)
+        {
+
+            $sqlSearch .= $includeNoBlackClause;
+
+
+        }
 
         $addsql = " AND ari.recipe_id IN 
 (SELECT DISTINCT ari.recipe_id
@@ -72,19 +141,36 @@ FROM avie_food_ingredient afi
 INNER JOIN avie_recipe_ingredient ari ON ari.ingredient_id = afi.ingredient_id
 WHERE afi.food_id = ?)";
 
-       $sqlGetRecipesByInclude = $basesql;
+
 
        for($i=1;$i<$includeCount;$i++)
        {
 
-           $sqlGetRecipesByInclude.= $addsql;
+           $sqlSearch.= $addsql;
 
 
        }
 
-       $sqlGetRecipesByInclude .= " ORDER BY ar.course, ar.title";
+        //display($sqlSearch);
 
-        $pdo->query($sqlGetRecipesByInclude, ['binds'=>$includes]);
+        if($redLimit > 0)
+        {
+            $sqlSearch .= $redLimitClause;
+            $sqlSearch .= " ORDER BY ar.course, ar.title";
+
+            $includes[] = $redLimit;
+
+            $pdo->query($sqlSearch, ['binds'=>$includes]);
+
+        }
+        else
+        {
+            error_reporting(E_ALL);
+
+            $sqlSearch .= " ORDER BY ar.course, ar.title";
+            $pdo->query($sqlSearch, ['binds'=>$includes]);
+        }
+
 
 
     }

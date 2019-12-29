@@ -103,8 +103,9 @@ $form->hidden('food_id', $id);
 $form->selectquery('level', 'Level:', $levelsList, 'name'
     , 'id',$level, ['autofocus'=>'autofocus']);
 $form->submit();
+echo "<a role='button' href='foods.php' class='btn btn-primary' name='clear'>Clear</a>";
 $form->close();
-
+Bootstrap4::linebreak(2);
 Bootstrap4::error_block("For best results, use the singular form of a food, e.g. almond not almonds. Click a row 
 to edit"
     ,'info');

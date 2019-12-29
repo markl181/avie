@@ -8,11 +8,14 @@ $pageTitle = 'Avie - Recipe Search';
 if(isset($_POST['submit']))
 {
 
-    error_reporting(E_ALL);
-
     //$date = preg_replace("([^0-9-])", "", $_POST['date']);
     $searchUrl = 'recipes.php?include=';
     $includeFoodIds = [];
+
+    $includeBlack = filter_var($_POST['includeblack'],FILTER_SANITIZE_NUMBER_INT);
+    $redLimit = filter_var($_POST['redlimit'],FILTER_SANITIZE_NUMBER_INT);
+
+
 
     foreach($_POST as $key=>$item)
     {
@@ -48,7 +51,18 @@ if(isset($_POST['submit']))
 
     }
 
-    //echo $_SERVER['SERVER_NAME'].$searchUrl;
+    if($includeBlack == 1)
+    {
+        $searchUrl .= '&includeblack=1';
+
+    }
+    if($redLimit > 0)
+    {
+
+        $searchUrl .= '&redlimit='.$redLimit;
+
+    }
+
 
     header("Location: $searchUrl");
 
@@ -71,7 +85,7 @@ Bootstrap4::menu($menu, basename(__FILE__));
 $today = get_date('Y-m-d');
 
 
-$pdo->query($sqlGetFoods);
+$pdo->query($sqlGetFoodsForSearch);
 $foodListAr = $pdo->result;
 
 foreach($foodListAr as $food)
@@ -89,11 +103,15 @@ $form->open();
 //$form->input('date','Date',['type'=>'date', 'value'=>$today]);
 
 
-Bootstrap4::error_block("Select the foods to search for!"
+Bootstrap4::error_block("Select the foods to search for! Black Labelled Ingredients are Filtered Out"
     ,'info');
 
 Bootstrap4::linebreak(2);
 Bootstrap4::heading('Food List',2);
+
+$form->checkbox('includeblack','Include Recipes with Black Labelled Ingredients');
+$form->input('redlimit','Limit to x red ingredients',['type'=>'number','min'=>0,'max'=>99]);
+Bootstrap4::linebreak(2);
 Bootstrap4::table(['Food','Level','Include']);
 
 foreach($foodListAr as $food)

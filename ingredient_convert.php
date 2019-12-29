@@ -35,7 +35,8 @@ foreach($foodList as $food)
     $foodSearch = "%$foodSearch%";
 
     //create a food->ingredient translation
-    $pdo->query($sqlGetRecipeIngredient, ['binds'=>[$foodSearch, $ingredientTime]]);
+    //$pdo->query($sqlGetRecipeIngredient, ['binds'=>[$foodSearch, $ingredientTime]]);
+    $pdo->query($sqlGetRecipeIngredientNoTime, ['binds'=>[$foodSearch]]);
     $ingredientList = $pdo->result;
 
     foreach($ingredientList as $ingredient)
