@@ -20,7 +20,10 @@ $sqlGetMeals = "SELECT id, ord, name FROM meal ORDER BY ord";
 $sqlGetFoodGroups = "SELECT id, name, ord, notes FROM food_group ORDER BY ord";
 $sqlGetFoods = "SELECT avie_food.id id, avie_food.name name, avie_level.name level FROM avie_food 
 LEFT OUTER JOIN avie_level ON avie_food.level_id = avie_level.id
-ORDER BY avie_food.name";
+ORDER BY 
+         level_id
+,        
+         avie_food.name";
 $sqlGetFoodsForSearch = "SELECT avie_food.id id, avie_food.name name, avie_level.name level FROM avie_food 
 LEFT OUTER JOIN avie_level ON avie_food.level_id = avie_level.id
 WHERE avie_level.name <> 'Black'
@@ -50,6 +53,101 @@ ORDER BY ar.course, ar.title
 
 $sqlGetRecipeByPublicId = "SELECT id, updated_at FROM avie_recipe WHERE public_id = ?";
 $sqlGetRecipes = "SELECT * from avie_recipe ORDER BY course, title";
+$sqlGetRecipesWithDetails = "SELECT * from avie_recipe ar 
+LEFT OUTER JOIN avie_recipe_tag art ON art.recipe_id = ar.public_id
+LEFT OUTER JOIN avie_tag att ON att.id = art.tag_id
+LEFT OUTER JOIN avie_recipe_ingredient ari ON ari.recipe_id = ar.public_id
+LEFT OUTER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
+LEFT OUTER JOIN avie_food af ON af.id = afi.food_id
+LEFT OUTER JOIN avie_level al ON al.id = af.level_id
+ORDER BY course, title";
+
+$sqlGetRecipesByInclude = "
+SELECT ar.*
+, blackct
+, redct
+, greenct
+FROM avie_recipe ar 
+LEFT OUTER JOIN avie_recipe_tag art ON art.recipe_id = ar.public_id
+LEFT OUTER JOIN avie_tag att ON att.id = art.tag_id
+LEFT OUTER JOIN
+(
+SELECT recipe_id, COUNT(DISTINCT food_id) blackct
+FROM 
+avie_recipe_ingredient ari
+LEFT OUTER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
+LEFT OUTER JOIN avie_food af ON af.id = afi.food_id
+LEFT OUTER JOIN avie_level al ON al.id = af.level_id
+WHERE al.name = 'Black'
+GROUP BY recipe_id
+) blackj ON blackj.recipe_id = ar.public_id 
+LEFT OUTER JOIN
+(
+SELECT recipe_id, COUNT(DISTINCT food_id) redct
+FROM 
+avie_recipe_ingredient ari
+LEFT OUTER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
+LEFT OUTER JOIN avie_food af ON af.id = afi.food_id
+LEFT OUTER JOIN avie_level al ON al.id = af.level_id
+WHERE al.name = 'Red'
+GROUP BY recipe_id
+) redj ON redj.recipe_id = ar.public_id 
+LEFT OUTER JOIN
+(
+SELECT recipe_id, COUNT(DISTINCT food_id) greenct
+FROM 
+avie_recipe_ingredient ari
+LEFT OUTER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
+LEFT OUTER JOIN avie_food af ON af.id = afi.food_id
+LEFT OUTER JOIN avie_level al ON al.id = af.level_id
+WHERE al.name = 'Green'
+GROUP BY recipe_id
+) greenj ON greenj.recipe_id = ar.public_id 
+WHERE 1=1";
+
+$sqlGetRecipesWithRating = "
+SELECT ar.*
+, blackct
+, redct
+, greenct
+FROM avie_recipe ar 
+LEFT OUTER JOIN avie_recipe_tag art ON art.recipe_id = ar.public_id
+LEFT OUTER JOIN avie_tag att ON att.id = art.tag_id
+LEFT OUTER JOIN
+(
+SELECT recipe_id, COUNT(DISTINCT food_id) blackct
+FROM 
+avie_recipe_ingredient ari
+LEFT OUTER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
+LEFT OUTER JOIN avie_food af ON af.id = afi.food_id
+LEFT OUTER JOIN avie_level al ON al.id = af.level_id
+WHERE al.name = 'Black'
+GROUP BY recipe_id
+) blackj ON blackj.recipe_id = ar.public_id 
+LEFT OUTER JOIN
+(
+SELECT recipe_id, COUNT(DISTINCT food_id) redct
+FROM 
+avie_recipe_ingredient ari
+LEFT OUTER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
+LEFT OUTER JOIN avie_food af ON af.id = afi.food_id
+LEFT OUTER JOIN avie_level al ON al.id = af.level_id
+WHERE al.name = 'Red'
+GROUP BY recipe_id
+) redj ON redj.recipe_id = ar.public_id 
+LEFT OUTER JOIN
+(
+SELECT recipe_id, COUNT(DISTINCT food_id) greenct
+FROM 
+avie_recipe_ingredient ari
+LEFT OUTER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
+LEFT OUTER JOIN avie_food af ON af.id = afi.food_id
+LEFT OUTER JOIN avie_level al ON al.id = af.level_id
+WHERE al.name = 'Green'
+GROUP BY recipe_id
+) greenj ON greenj.recipe_id = ar.public_id 
+WHERE rating >0 ORDER BY course, title";
+
 $sqlInsertRecipe = "INSERT INTO avie_recipe (public_id, title, course, main_ingredient, url, website, prep_time
 , cook_time, servings, yield, rating, public_url, photo, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
@@ -73,13 +171,19 @@ $sqlGetIngredientTime = "SELECT MAX(timestamp) maxtime FROM avie_food_ingredient
 $sqlGetFoodIngredient = "SELECT id FROM avie_food_ingredient WHERE food_id = ? AND ingredient_id = ?";
 $sqlInsertFoodIngredient = "INSERT INTO avie_food_ingredient (food_id, ingredient_id) VALUES (?,?)";
 
-$sqlGetRecipesByInclude = "
-SELECT DISTINCT ar.*
-FROM avie_food_ingredient afi
-INNER JOIN avie_recipe_ingredient ari ON ari.ingredient_id = afi.ingredient_id
-INNER JOIN avie_recipe ar ON ar.public_id = ari.recipe_id
-WHERE 1=1";
 
+
+$sqlGetUnmatchedIngredients = "SELECT
+name, COUNT(1) ct
+FROM avie_ingredient
+WHERE id NOT IN
+(SELECT ingredient_id FROM avie_food_ingredient)
+GROUP BY name
+ORDER BY 2 DESC,1";
+
+$sqlFinishOneInclude = " AND
+afi.food_id = ?
+ORDER BY ar.course, ar.title";
 
 
 ?>

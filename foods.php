@@ -16,6 +16,9 @@ $level = '';
 $dbFood = '';
 $id = '';
 
+$dbFood = $_GET['food'];
+
+
 if(isset($_POST['submit']))
 {
 

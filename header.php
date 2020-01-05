@@ -26,6 +26,7 @@
     <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     <link href="css/food.css" rel="stylesheet" type='text/css'/>
+<link href="/custom.css" rel="stylesheet" type="text/css"/>
 <?php
 echo "<title>$pageTitle</title>";
 echo "</head>";

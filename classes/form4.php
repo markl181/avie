@@ -286,32 +286,22 @@ class form4
 	 * @param string $selected (default: '')
 	 * @return void
 	 */
-	public function select($name, $label, $values, $comment='')
+	public function select($name, $label, $values, $selected='')
 	{
 		//get global size from bootstrap
 		$size = Bootstrap4::$size;
 		$labelWidth = 4;
 		$fieldSize = 5;
-		$selected = '';
 
 		echo "<div class='form-group align-items-center'>";
 		echo "<br/>";
 		echo "<div class='row'>";
         echo "<label class='control-label col-sm-$labelWidth' for='$name'>";
 
-        if($comment == '')
-        {
 
             echo " $label </label>";
-        }
-        else
-        {
-            echo " $label <small class='form-text text-muted'>$comment</small></label>";
-        }
 
-
-
-		echo "<select class='form-control col-sm-$fieldSize' id='$name' name='$name'>";
+echo "<select class='form-control col-sm-$fieldSize' id='$name' name='$name'>";
 
 		if ($selected=='')
 			{echo "<option label='' value='' selected></option>";}
@@ -326,12 +316,7 @@ class form4
 		}
 		Bootstrap4::tag_close('select');
 
-
-
-
 		Bootstrap4::tag_close('div');
-
-
 
 		Bootstrap4::tag_close('div');
 
