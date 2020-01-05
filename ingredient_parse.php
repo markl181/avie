@@ -6,17 +6,13 @@ Created by Mark Leci - 2019-12-22
 
 $pageTitle = 'Avie - Parse';
 
-include 'header.php';
+include 'header_log.php';
 
-Bootstrap4::menu($menu, basename(__FILE__));
+//Bootstrap4::menu($menu, basename(__FILE__));
 
 //error_reporting(0);
 
 /*
- * Can we download a file say daily from https://www.plantoeat.com/recipes/export.csv
- * and store it on the server, then daily parse it for ingredients and store that in the DB
- * even if we have to do this manually it's ok
- *
  * Reorder code once all updates are done so we only check the deltas
  *
  *
@@ -39,7 +35,7 @@ Bootstrap4::menu($menu, basename(__FILE__));
  *
  */
 
-$fileName = 'plantoeat-recipes-358334_12-22-2019.csv';
+$fileName = 'plantoeat-recipes.csv';
 $rowLimit = 50000;
 
 $file = fopen($fileName, 'r');
@@ -211,7 +207,7 @@ fclose($file);
 
 
 
-include 'footer.php';
+//include 'footer.php';
 
 
 

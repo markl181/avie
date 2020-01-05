@@ -85,8 +85,6 @@ else
 {
     $pdo->query($sqlGetRecipesWithRating);
 
-   // Bootstrap4::heading("Recipe List ($recipeCount recipes)",2);
-    Bootstrap4::error_block("Filtered - only rated recipes",'info');
     $filters[] = 1;
 }
 
@@ -148,6 +146,33 @@ $recipeCount = count($recipeList);
             Bootstrap4::heading("Recipe List - Filtered ($recipeCount recipes)",2);
         }
 
+        if($filters)
+        {
+            $text = '';
+
+            foreach($filters as $filter)
+            {
+                if($filter == 1)
+                {
+                    $text.= 'only rated recipes';
+
+                }
+                if($filter == 2)
+                {
+                    $text.= 'only specific ingredients';
+
+                }
+                if($filter == 3)
+                {
+                    $text.= 'only specific ingredient';
+
+                }
+
+            }
+
+            Bootstrap4::error_block("Filtered - $text",'info');
+
+        }
 
 
 //Form

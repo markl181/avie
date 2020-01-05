@@ -120,6 +120,8 @@ foreach($foodListAr as $food)
     $food['name'] = "<a href='recipes.php?ingredient=".$food['name']."' target='_blank'>".$food['name']."</a>";
     $food['include'] = "<input type='checkbox' value='1' name='checked_".$food['id']."' />";
 
+$food['name'] = food_colour($food['name'],$food['level']);
+
     Bootstrap4::table_row([$food['name'], $food['level'],$food['include']]);
 
 

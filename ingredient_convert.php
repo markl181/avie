@@ -6,9 +6,9 @@ Created by Mark Leci - 2019-12-26
 
 $pageTitle = 'Avie - Convert';
 
-include 'header.php';
+include 'header_log.php';
 
-Bootstrap4::menu($menu, basename(__FILE__));
+//Bootstrap4::menu($menu, basename(__FILE__));
 
 /*
  * Really only need to check if the ingredients or foods have been modified since last check...
@@ -64,6 +64,6 @@ foreach($foodList as $food)
 }
 
 
-include 'footer.php';
+//include 'footer.php';
 
 ?>

@@ -7,6 +7,12 @@ require 'classes/form4.php';
 require 'classes/pdo_query.php';
 require 'classes/fusioncharts.php';
 
+$greenSpan = 'rgba(0, 255, 0, 0.6)';
+$redSpan = 'rgba(255, 0, 0, 0.6)';
+$yellowSpan = 'rgba(255, 255, 0, 0.6)';
+$blackSpan = 'rgba(20,20,20,0.9)';
+
+
 function errors($value=0)
 {
 
@@ -22,6 +28,35 @@ function errors($value=0)
 
     }
 
+
+}
+
+function food_colour($name,$level)
+{
+    $greenSpan = 'rgba(0, 255, 0, 0.6)';
+    $redSpan = 'rgba(255, 0, 0, 0.6)';
+    $yellowSpan = 'rgba(255, 255, 0, 0.6)';
+    $blackSpan = 'rgba(20,20,20,0.9)';
+
+
+    if($level == 'Black')
+    {
+        $name .= "|$blackSpan";
+    }
+    else if($level == 'Green')
+    {
+        $name.= "|$greenSpan";
+    }
+    else if($level == 'Red')
+    {
+        $name .= "|$redSpan";
+    }
+    else if($level == 'Yellow')
+    {
+        $name .= "|$yellowSpan";
+    }
+
+    return $name;
 
 }
 

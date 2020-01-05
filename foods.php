@@ -119,6 +119,8 @@ Bootstrap4::table(['Food','Level']);
 
 $rowClass = 'text-left clickable-row';
 
+error_reporting(0);
+
 foreach($foodListAr as $food)
 {
 
@@ -126,9 +128,9 @@ foreach($foodListAr as $food)
 
     $food['name'] = "<a href='recipes.php?ingredient=".$food['id']."' target='_blank'>".$food['name']."</a>";
 
+    $food['name'] = food_colour($food['name'],$food['level']);
 
     Bootstrap4::table_row([$food['name'], $food['level']], ['class' => $rowClass, 'data-href' => $url]);
-
 
 }
 
