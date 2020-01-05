@@ -4,25 +4,52 @@ Created by Mark Leci - 2019-12-30
 
 */
 
-/*
- * Show a list of ingredients that are not linked to any food by count.
- * Click an ingredient and prefill it into the foods form
- *
- *
- */
-
 $pageTitle = 'Avie - Food ideas';
 
 include 'header.php';
 
 Bootstrap4::menu($menu, basename(__FILE__));
 
-Bootstrap4::heading("Some random ingredients that might give you an idea of foods to add",5);
-
-
 
 $pdo->query($sqlGetUnmatchedIngredients);
 $ingredientList = $pdo->result;
+
+$ingredientCount = count($ingredientList);
+
+Bootstrap4::heading("Since last update",4);
+Bootstrap4::heading("$ingredientCount unlinked ingredients that might give you an idea of foods to add",5);
+
+$pdo->query($sqlGetRecipesByInclude);
+$recipeList = $pdo->result;
+$emptyCt = 0;
+$noRedCt = 0;
+$noGreenCt = 0;
+
+foreach($recipeList as $recipe)
+{
+
+    if($recipe['redct'] == '' && $recipe['greenct'] == '')
+    {
+        $emptyCt ++;
+
+    }
+    if ($recipe['redct'] == '')
+    {
+        $noRedCt ++;
+
+    }
+    if($recipe['greenct'] == '')
+    {
+        $noGreenCt ++;
+    }
+
+}
+
+Bootstrap4::heading("$emptyCt Recipes with no red or green ingredients",5);
+Bootstrap4::heading("$noRedCt Recipes with no red ingredients",5);
+Bootstrap4::heading("$noGreenCt Recipes with no green ingredients",5);
+
+
 
 Bootstrap4::table(['Ingredient','Count']);
 
