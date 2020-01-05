@@ -60,6 +60,33 @@ function food_colour($name,$level)
 
 }
 
+function convertToHoursMins($time, $format = '%2dh %2dm') {
+    if ($time < 1) {
+        return;
+    }
+    $hours = floor($time / 60);
+    $minutes = ($time % 60);
+
+    if($hours > 0 && $minutes > 0)
+    {
+        return sprintf($format, $hours, $minutes);
+
+    }
+    else if($hours == 0)
+    {
+
+        return sprintf('%2dm', $minutes);
+
+    }
+    else if($minutes == 0)
+    {
+        return sprintf('%2dh', $hours);
+
+    }
+
+    return sprintf($format, $hours, $minutes);
+}
+
 function curl_build($url, $headers = 0)
     //build a curl request with or without headers
 {

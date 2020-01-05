@@ -204,6 +204,8 @@ foreach($recipeList as $recipe)
     $recipe['rating'] = ($recipe['rating'] == 0) ? '' : $recipe['rating'];
     $recipe['time'] = ($recipe['time'] == 0) ? '' : $recipe['time'];
 
+    $recipe['time'] = convertToHoursMins($recipe['time']);
+
     Bootstrap4::table_row([
         $recipe['title'], $recipe['course'], $recipe['rating'], $recipe['time']
         , $recipe['photo']
