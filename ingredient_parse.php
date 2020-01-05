@@ -35,6 +35,8 @@ include 'header_log.php';
  *
  */
 
+$start = microtime(true);
+
 $fileName = 'plantoeat-recipes.csv';
 $rowLimit = 50000;
 
@@ -205,10 +207,12 @@ while (($data = fgetcsv($file, 10000, ",")) && $i <= $rowLimit)
 
 fclose($file);
 
+$pdo->query($sqlInsertUpdate, ['binds'=>[1], ['type'=>'insert']]);
 
 
 //include 'footer.php';
 
+exec_time($start, __LINE__);
 
 
 ?>

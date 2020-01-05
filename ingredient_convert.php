@@ -15,15 +15,14 @@ include 'header_log.php';
  * If a food changes and matches different ingredients, that's going to cause problems!
  */
 
+$start = microtime(true);
 
-
-$pdo->query($sqlGetFoods);
+$pdo->query($sqlGetFoodsForUpdate);
 $foodList = $pdo->result;
 
+//run list of all updated foods
 
-$pdo->query($sqlGetIngredientTime, ['fetch'=>'one']);
-$ingredientTime = $pdo->result['maxtime'];
-
+echo "Running list of updated foods<br/>";
 
 foreach($foodList as $food)
 {
@@ -32,12 +31,13 @@ foreach($foodList as $food)
     $pattern = '/\(.*$/';
     $foodSearch = preg_replace($pattern,'',$food['name']);
     $foodSearch = trim($foodSearch);
+    $originalFood = $foodSearch;
     $foodSearch = "%$foodSearch%";
 
     //create a food->ingredient translation
-    //$pdo->query($sqlGetRecipeIngredient, ['binds'=>[$foodSearch, $ingredientTime]]);
     $pdo->query($sqlGetRecipeIngredientNoTime, ['binds'=>[$foodSearch]]);
     $ingredientList = $pdo->result;
+    $insertCount = 0;
 
     foreach($ingredientList as $ingredient)
     {
@@ -50,18 +50,68 @@ foreach($foodList as $food)
         {
 
             $pdo->query($sqlInsertFoodIngredient, ['binds'=>[$food['id'],$ingredient['id']],'type'=>'insert']);
-
+            $insertCount++;
 
         }
 
+    }
+
+    echo "$originalFood search completed - $insertCount new ingredients linked<br/>";
+
+}
+
+$pdo->query($sqlGetFoods);
+$foodList = $pdo->result;
+
+//update all foods where the ingredient has changed
+
+echo "Running list of updated ingredients<br/>";
+
+    foreach($foodList as $food)
+    {
+
+        //set_time_limit(30);
+        $pattern = '/\(.*$/';
+        $foodSearch = preg_replace($pattern,'',$food['name']);
+        $foodSearch = trim($foodSearch);
+        $originalFood = $foodSearch;
+        $foodSearch = "%$foodSearch%";
+
+        //create a food->ingredient translation
+        $pdo->query($sqlGetRecipeIngredientTime, ['binds'=>[$foodSearch]]);
+        $ingredientList = $pdo->result;
+        $insertCount = 0;
+
+        foreach($ingredientList as $ingredient)
+        {
+
+            set_time_limit(30);
+
+            $pdo->query($sqlGetFoodIngredient, ['binds'=>[$food['id'],$ingredient['id']],'fetch'=>'one']);
+
+            if(!$pdo->result)
+            {
+
+                $pdo->query($sqlInsertFoodIngredient, ['binds'=>[$food['id'],$ingredient['id']],'type'=>'insert']);
+                $insertCount++;
+
+            }
+
+        }
+
+        if($insertCount > 0)
+        {
+            echo "$originalFood search completed - $insertCount new ingredients linked<br/>";
+        }
 
 
 
     }
 
-    echo "$foodSearch search completed<br/>";
+exec_time($start, __LINE__);
 
-}
+$pdo->query($sqlInsertUpdate, ['binds'=>[2], ['type'=>'insert']]);
+
 
 
 //include 'footer.php';

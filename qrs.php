@@ -24,6 +24,18 @@ ORDER BY
          level_id
 ,        
          avie_food.name";
+
+$sqlGetFoodsForUpdate = "SELECT avie_food.id id, avie_food.name NAME, avie_level.name LEVEL FROM avie_food 
+LEFT OUTER JOIN avie_level ON avie_food.level_id = avie_level.id
+WHERE avie_food.TIMESTAMP > 
+(SELECT max(TIMESTAMP) 
+FROM avie_update 
+WHERE TYPE = 2
+)
+ORDER BY 
+level_id,        
+avie_food.name";
+
 $sqlGetFoodsForSearch = "SELECT avie_food.id id, avie_food.name name, avie_level.name level FROM avie_food 
 LEFT OUTER JOIN avie_level ON avie_food.level_id = avie_level.id
 WHERE avie_level.name <> 'Black'
@@ -161,11 +173,25 @@ ORDER BY ar.course, ar.title
 $sqlGetRecipeIngredientNoTime = "SELECT DISTINCT ai.id, ai.name from avie_recipe ar
 INNER JOIN avie_recipe_ingredient ari ON ari.recipe_id = ar.public_id
 INNER JOIN avie_ingredient ai ON ai.id = ari.ingredient_id
-WHERE ai.name LIKE ? 
+WHERE ai.name LIKE ?
 ORDER BY ar.course, ar.title
 ";
 
-$sqlGetIngredientTime = "SELECT MAX(timestamp) maxtime FROM avie_food_ingredient";
+$sqlGetRecipeIngredientTime = "SELECT DISTINCT ai.id, ai.name from avie_recipe ar
+INNER JOIN avie_recipe_ingredient ari ON ari.recipe_id = ar.public_id
+INNER JOIN avie_ingredient ai ON ai.id = ari.ingredient_id
+WHERE ai.name LIKE ?
+AND ari.timestamp > 
+(
+SELECT
+MAX(TIMESTAMP)
+FROM avie_update
+WHERE TYPE = 2
+)
+ORDER BY ar.course, ar.title
+";
+
+
 
 
 $sqlGetFoodIngredient = "SELECT id FROM avie_food_ingredient WHERE food_id = ? AND ingredient_id = ?";
@@ -185,5 +211,6 @@ $sqlFinishOneInclude = " AND
 afi.food_id = ?
 ORDER BY ar.course, ar.title";
 
+$sqlInsertUpdate = "INSERT INTO avie_update (type) VALUES (?)";
 
 ?>
