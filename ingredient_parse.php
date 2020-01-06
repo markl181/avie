@@ -37,14 +37,16 @@ include 'header_log.php';
 
 $start = microtime(true);
 
+error_reporting(1);
+
 $fileName = 'plantoeat-recipes.csv';
-$rowLimit = 50000;
+$rowLimit = 500000;
 
 $file = fopen($fileName, 'r');
 
 $i = 0;
 
-while (($data = fgetcsv($file, 10000, ",")) && $i <= $rowLimit)
+while (($data = fgetcsv($file, 0, ",")) !==FALSE && $i <= $rowLimit)
 {
     // Read the data
     if($i == 0)
@@ -109,44 +111,7 @@ while (($data = fgetcsv($file, 10000, ",")) && $i <= $rowLimit)
             }
         }
 
-        foreach ($ingredients as $ingredient)
-        {
-            if($ingredient <> '') {
-
-                //$ingredient = str_ireplace("1/2 cup","",$ingredient);
-                $ingredient = parse_ingredient($ingredient);
-
-                //check if the record already exists and insert it if not
-                $pdo->idColumn = 'id';
-                $pdo->searchColumn = 'name';
-                $pdo->searchTable = 'avie_ingredient';
-                $pdo->searchValue = $ingredient;
-                $pdo->insertQuery = $sqlInsertIngredient;
-                $pdo->insertBinds = [$ingredient];
-
-                $pdo->find_id();
-                $ingredientId = $pdo->recordId;
-
-                //check if the ingredient exists for the recipe
-                $pdo->query($sqlSelectRecipeIngredient, ['binds'=>[$publicId, $ingredientId], 'fetch'=>'one']);
-                $recipeIngredient = $pdo->result;
-
-                if(!$recipeIngredient)
-                {
-
-                    $pdo->query($sqlInsertRecipeIngredient, ['binds'=>[$publicId, $ingredientId], 'type'=>'insert']);
-                    echo "Recipe Ingredient Created for recipe $publicId<br/>";
-                }
-
-                //@@todo do we want to remove any ingredients that were removed?
-
-
-
-            }
-
-        }
-
-            if($title <> '')
+            if($title <> '' && is_numeric($publicId))
             {
                 //check recipe based on public url
                 $pdo->query($sqlGetRecipeByPublicId, ['binds'=>[$publicId], 'fetch'=>'one']);
@@ -169,9 +134,6 @@ while (($data = fgetcsv($file, 10000, ",")) && $i <= $rowLimit)
                 else
                 {
                     //need to add recipe
-                    $sqlInsertRecipe = "INSERT INTO avie_recipe (public_id, title, course, main_ingredient, url, website, prep_time
-, cook_time, servings, yield, rating, public_url, photo, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
-
                     $pdo->query($sqlInsertRecipe, ['binds'=>[$publicId, $title, $course, $mainIngredient, $url
                         , $website, $prepTime, $cookTime, $servings, $yield, $rating, $publicUrl, $photo, $updatedAt]
                         , 'type'=>'insert']);
@@ -191,6 +153,42 @@ while (($data = fgetcsv($file, 10000, ",")) && $i <= $rowLimit)
                     unset ($update);
                 }
 
+                foreach ($ingredients as $ingredient)
+                {
+                    if($ingredient <> '') {
+
+                        //$ingredient = str_ireplace("1/2 cup","",$ingredient);
+                        $ingredient = parse_ingredient($ingredient);
+
+                        //check if the record already exists and insert it if not
+                        $pdo->idColumn = 'id';
+                        $pdo->searchColumn = 'name';
+                        $pdo->searchTable = 'avie_ingredient';
+                        $pdo->searchValue = $ingredient;
+                        $pdo->insertQuery = $sqlInsertIngredient;
+                        $pdo->insertBinds = [$ingredient];
+
+                        $pdo->find_id();
+                        $ingredientId = $pdo->recordId;
+
+                        //check if the ingredient exists for the recipe
+                        $pdo->query($sqlSelectRecipeIngredient, ['binds'=>[$publicId, $ingredientId], 'fetch'=>'one']);
+                        $recipeIngredient = $pdo->result;
+
+                        if(!$recipeIngredient)
+                        {
+
+                            $pdo->query($sqlInsertRecipeIngredient, ['binds'=>[$publicId, $ingredientId], 'type'=>'insert']);
+                            echo "Recipe Ingredient Created for recipe $publicId<br/>";
+                        }
+
+                        //@@todo do we want to remove any ingredients that were removed?
+
+
+
+                    }
+
+                }
 
 
             }
@@ -207,12 +205,14 @@ while (($data = fgetcsv($file, 10000, ",")) && $i <= $rowLimit)
 
 fclose($file);
 
-$pdo->query($sqlInsertUpdate, ['binds'=>[1], ['type'=>'insert']]);
+exec_time($start, __LINE__);
+
+$pdo->query($sqlInsertUpdate, ['binds'=>['1'], ['type'=>'insert']]);
 
 
 //include 'footer.php';
 
-exec_time($start, __LINE__);
+
 
 
 ?>

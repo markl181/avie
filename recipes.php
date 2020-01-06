@@ -17,7 +17,7 @@ include 'header.php';
 
 Bootstrap4::menu($menu, basename(__FILE__));
 
-error_reporting(0);
+error_reporting(1);
 
 $ingredient = $_GET['ingredient'];
 $includes = $_GET['include'];
@@ -32,6 +32,36 @@ $redLimit = filter_var($redLimit, FILTER_SANITIZE_NUMBER_INT);
 $greenLimit = filter_var($greenLimit, FILTER_SANITIZE_NUMBER_INT);
 $course = filter_var($course, FILTER_SANITIZE_STRING);
 $rating = filter_var($rating, FILTER_SANITIZE_NUMBER_INT);
+
+foreach($_GET as $key=>$item)
+{
+
+    if(strpos($key,'request') !== FALSE)
+    {
+
+       $recipeId = str_replace('request_','',$key);
+       $recipeId = filter_var($recipeId, FILTER_SANITIZE_NUMBER_INT);
+
+        //check if the request already exists and insert it if not
+        $sqlGetRequestById = "SELECT id FROM avie_recipe_request WHERE active = 1 AND recipe_id = ?";
+        $sqlInsertRequest = "INSERT INTO avie_recipe_request (recipe_id) VALUES (?)";
+
+        $pdo->query($sqlGetRequestById, ['binds'=>[$recipeId],'fetch'=>'one']);
+
+        if(!$pdo->result)
+        {
+            $pdo->query($sqlInsertRequest, ['binds'=>[$recipeId],'type'=>'insert']);
+
+            Bootstrap4::error_block("Request submitted for recipe $recipeId",'success');
+        }
+
+
+
+    }
+
+
+}
+
 
 if($ingredient)
 {
@@ -130,9 +160,8 @@ $recipeList = $pdo->result;
         $previousId = $recipe['public_id'];
     }
 
+$recipeList = array_filter($recipeList);
 $recipeCount = count($recipeList);
-
-//display($recipeList);
 
 
         if($recipeCount == 0)
@@ -184,39 +213,47 @@ $form->select('course','Course: ',[''=>'','Appetizer'=>'Appetizer','Breakfast'=>
     ,'Sides'=>'Sides','Soup'=>'Soup'], $course);
 $form->input('redlimit','Max Red:',['type'=>'number','min'=>0,'max'=>10, 'value'=>$redLimit]);
 $form->input('greenlimit','Min Green:',['type'=>'number','min'=>0,'max'=>10, 'value'=>$greenLimit]);
-$form->submit();
-$form->close();
 
 
-Bootstrap4::table(['Title','Course','Rating','Time (m)','Photo']);
+
+Bootstrap4::error_block('Check a box to request a recipe','info');
+
+Bootstrap4::table(['Title','Course','Rating','Time (m)','Photo','']);
 
 /*
  * Add in course jumps
  *
  */
 
-foreach($recipeList as $recipe)
+
+foreach($recipeList as $key=>$recipeItem)
 {
-    $recipe['time'] = $recipe['prep_time'] + $recipe['cook_time'];
-    $recipe['title'] = "<a target='_blank' href='".$recipe['public_url']."'>".$recipe['title']."</a>";
-    $recipe['photo'] = "<img height='50px' src='".$recipe['photo']."'/>";
+    $recipeItem['time'] = $recipeItem['prep_time'] + $recipeItem['cook_time'];
+    $recipeItem['time'] = ($recipeItem['time'] == 0) ? '' : $recipeItem['time'];
+    $recipeItem['time'] = convertToHoursMins($recipeItem['time']);
 
-    $recipe['rating'] = ($recipe['rating'] == 0) ? '' : $recipe['rating'];
-    $recipe['time'] = ($recipe['time'] == 0) ? '' : $recipe['time'];
+    $recipeItem['title'] = $recipeItem['title']."||".$recipeItem['public_url'];
+    $recipeItem['photo'] = "<img height='50px' src='".$recipeItem['photo']."'/>";
+    $recipeItem['rating'] = ($recipeItem['rating'] == 0) ? '' : $recipeItem['rating'];
 
-    $recipe['time'] = convertToHoursMins($recipe['time']);
+    $recipeItem['request'] = "<input type='checkbox' value='1'".$recipeItem['request']." name='request_"
+        .$recipeItem['public_id']."' />";
 
     Bootstrap4::table_row([
-        $recipe['title'], $recipe['course'], $recipe['rating'], $recipe['time']
-        , $recipe['photo']
+        $recipeItem['title']
+        , $recipeItem['course'], $recipeItem['rating'], $recipeItem['time']
+        , $recipeItem['photo'], $recipeItem['request']
 
     ]);
+
 
 
 }
 
 Bootstrap4::table_close();
 
+$form->submit();
+$form->close();
 
 include 'footer.php';
 

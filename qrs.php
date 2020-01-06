@@ -177,6 +177,9 @@ WHERE ai.name LIKE ?
 ORDER BY ar.course, ar.title
 ";
 
+$sqlInsertRecipe = "INSERT INTO avie_recipe (public_id, title, course, main_ingredient, url, website, prep_time
+, cook_time, servings, yield, rating, public_url, photo, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
+
 $sqlGetRecipeIngredientTime = "SELECT DISTINCT ai.id, ai.name from avie_recipe ar
 INNER JOIN avie_recipe_ingredient ari ON ari.recipe_id = ar.public_id
 INNER JOIN avie_ingredient ai ON ai.id = ari.ingredient_id
@@ -197,12 +200,11 @@ ORDER BY ar.course, ar.title
 $sqlGetFoodIngredient = "SELECT id FROM avie_food_ingredient WHERE food_id = ? AND ingredient_id = ?";
 $sqlInsertFoodIngredient = "INSERT INTO avie_food_ingredient (food_id, ingredient_id) VALUES (?,?)";
 
-
-
 $sqlGetUnmatchedIngredients = "SELECT
 name, COUNT(1) ct
-FROM avie_ingredient
-WHERE id NOT IN
+FROM avie_ingredient ai
+INNER JOIN avie_recipe_ingredient ari ON ari.ingredient_id = ai.id
+WHERE ai.id NOT IN
 (SELECT ingredient_id FROM avie_food_ingredient)
 GROUP BY name
 ORDER BY 2 DESC,1";

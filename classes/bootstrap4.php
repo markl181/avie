@@ -547,8 +547,6 @@ class Bootstrap4
                 } else {
                     $cellReturn .= ">$cellData";
 
-
-
                 }
 
 

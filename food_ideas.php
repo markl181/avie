@@ -67,8 +67,6 @@ foreach ($ingredientList as $row)
 
     }
 
-
-
 }
 
 

@@ -3,11 +3,14 @@
 
 $body-bg: #6E3667;
 
-/*$theme-colors: (
-        "primary": #0074d9,
-        "danger": #ff4136
-);*/
+$theme-colors: (
+        "primary": #535353
 
-@import "/css/scss/bootstrap";
-//@import "custom";
-@import "bootstrap";
+);
+
+//@import "../scss/bootstrap";
+@import "../scss/functions";
+@import "../scss/variables";
+@import "../scss/mixins";
+//@import "../import/custom";
+//@import "bootstrap";
