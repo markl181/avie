@@ -56,9 +56,12 @@ $sqlInsertRecipeTag = "INSERT INTO avie_recipe_tag (recipe_id, tag_id) VALUES (?
 $sqlSelectRecipeIngredient = "SELECT * FROM avie_recipe_ingredient WHERE recipe_id = ? AND ingredient_id = ?";
 $sqlInsertRecipeIngredient = "INSERT INTO avie_recipe_ingredient (recipe_id, ingredient_id) VALUES (?,?)";
 
-$sqlFilterRecipeByIngredient = "SELECT DISTINCT ar.* from avie_recipe ar
+$sqlFilterRecipeByIngredient = "SELECT DISTINCT ar.* 
+, arr.id request_id
+from avie_recipe ar
 INNER JOIN avie_recipe_ingredient ari ON ari.recipe_id = ar.public_id
 INNER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
+LEFT OUTER JOIN avie_recipe_request arr ON arr.recipe_id = ar.public_id AND arr.active = 1
 WHERE afi.food_id = ?
 ORDER BY ar.course, ar.title
 ";
@@ -79,9 +82,11 @@ SELECT ar.*
 , blackct
 , redct
 , greenct
+, arr.id request_id
 FROM avie_recipe ar 
 LEFT OUTER JOIN avie_recipe_tag art ON art.recipe_id = ar.public_id
 LEFT OUTER JOIN avie_tag att ON att.id = art.tag_id
+LEFT OUTER JOIN avie_recipe_request arr ON arr.recipe_id = ar.public_id AND arr.active = 1
 LEFT OUTER JOIN
 (
 SELECT recipe_id, COUNT(DISTINCT food_id) blackct
@@ -118,13 +123,15 @@ GROUP BY recipe_id
 WHERE 1=1";
 
 $sqlGetRecipesWithRating = "
-SELECT ar.*
+SELECT DISTINCT ar.*
 , blackct
 , redct
 , greenct
+, arr.id request_id
 FROM avie_recipe ar 
 LEFT OUTER JOIN avie_recipe_tag art ON art.recipe_id = ar.public_id
 LEFT OUTER JOIN avie_tag att ON att.id = art.tag_id
+LEFT OUTER JOIN avie_recipe_request arr ON arr.recipe_id = ar.public_id AND arr.active = 1
 LEFT OUTER JOIN
 (
 SELECT recipe_id, COUNT(DISTINCT food_id) blackct
@@ -214,5 +221,12 @@ afi.food_id = ?
 ORDER BY ar.course, ar.title";
 
 $sqlInsertUpdate = "INSERT INTO avie_update (type) VALUES (?)";
+
+$sqlGetRequests = "SELECT arr.id, arr.active, arr.date, ar.title, ar.course FROM avie_recipe_request arr 
+INNER JOIN avie_recipe ar ON ar.public_id = arr.recipe_id
+WHERE active = 1";
+
+$sqlUpdateRequestDate = "UPDATE avie_recipe_request SET date = ? WHERE id = ?";
+$sqlUpdateRequestStatus = "UPDATE avie_recipe_request SET active = 0 WHERE id = ?";
 
 ?>

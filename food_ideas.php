@@ -8,7 +8,7 @@ $pageTitle = 'Avie - Food ideas';
 
 include 'header.php';
 
-Bootstrap4::menu($menu, basename(__FILE__));
+Bootstrap4::menu($menu, basename(__FILE__),4);
 
 
 $pdo->query($sqlGetUnmatchedIngredients);

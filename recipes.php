@@ -12,10 +12,11 @@ include 'header.php';
  * Make a recipe clickable
  *
  * Show the filter details ie ingredient name
+ * check the box if the recipe was requested already and request is active
  *
  */
 
-Bootstrap4::menu($menu, basename(__FILE__));
+Bootstrap4::menu($menu, basename(__FILE__),4);
 
 error_reporting(1);
 
@@ -235,6 +236,11 @@ foreach($recipeList as $key=>$recipeItem)
     $recipeItem['title'] = $recipeItem['title']."||".$recipeItem['public_url'];
     $recipeItem['photo'] = "<img height='50px' src='".$recipeItem['photo']."'/>";
     $recipeItem['rating'] = ($recipeItem['rating'] == 0) ? '' : $recipeItem['rating'];
+
+    if($recipeItem['request_id'])
+    {
+        $recipeItem['request'] = ' checked';
+    }
 
     $recipeItem['request'] = "<input type='checkbox' value='1'".$recipeItem['request']." name='request_"
         .$recipeItem['public_id']."' />";

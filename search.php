@@ -71,15 +71,13 @@ if(isset($_POST['submit']))
 
 include 'header.php';
 
-error_reporting(1);
-
 /*
  * Show some checkboxes and redirect to the search page based on them
  *
  *
  */
 
-Bootstrap4::menu($menu, basename(__FILE__));
+Bootstrap4::menu($menu, basename(__FILE__),4);
 
 
 $today = get_date('Y-m-d');

@@ -7,7 +7,7 @@ $pageTitle = 'Avie - Foods';
 
 include 'header.php';
 
-Bootstrap4::menu($menu, basename(__FILE__));
+Bootstrap4::menu($menu, basename(__FILE__),4);
 
 
 $today = get_date('Y-m-d');
