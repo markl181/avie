@@ -27,36 +27,44 @@ echo "Running list of updated foods<br/>";
 foreach($foodList as $food)
 {
 
-    //set_time_limit(30);
-    $pattern = '/\(.*$/';
-    $foodSearch = preg_replace($pattern,'',$food['name']);
-    $foodSearch = trim($foodSearch);
-    $originalFood = $foodSearch;
-    $foodSearch = "%$foodSearch%";
+    if($food['name'] <> '')
 
-    //create a food->ingredient translation
-    $pdo->query($sqlGetRecipeIngredientNoTime, ['binds'=>[$foodSearch]]);
-    $ingredientList = $pdo->result;
-    $insertCount = 0;
-
-    foreach($ingredientList as $ingredient)
     {
 
-        set_time_limit(30);
+        //set_time_limit(30);
+        $pattern = '/\(.*$/';
+        $foodSearch = preg_replace($pattern,'',$food['name']);
+        $foodSearch = trim($foodSearch);
+        $originalFood = $foodSearch;
+        $foodSearch = "%$foodSearch%";
 
-        $pdo->query($sqlGetFoodIngredient, ['binds'=>[$food['id'],$ingredient['id']],'fetch'=>'one']);
+        //create a food->ingredient translation
+        $pdo->query($sqlGetRecipeIngredientNoTime, ['binds'=>[$foodSearch]]);
+        $ingredientList = $pdo->result;
+        $insertCount = 0;
 
-        if(!$pdo->result)
+        foreach($ingredientList as $ingredient)
         {
 
-            $pdo->query($sqlInsertFoodIngredient, ['binds'=>[$food['id'],$ingredient['id']],'type'=>'insert']);
-            $insertCount++;
+            set_time_limit(30);
+
+            $pdo->query($sqlGetFoodIngredient, ['binds'=>[$food['id'],$ingredient['id']],'fetch'=>'one']);
+
+            if(!$pdo->result)
+            {
+
+                $pdo->query($sqlInsertFoodIngredient, ['binds'=>[$food['id'],$ingredient['id']],'type'=>'insert']);
+                $insertCount++;
+
+            }
 
         }
 
+        echo "$originalFood search completed - $insertCount new ingredients linked<br/>";
+
+
     }
 
-    echo "$originalFood search completed - $insertCount new ingredients linked<br/>";
 
 }
 

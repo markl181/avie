@@ -11,7 +11,7 @@ Bootstrap4::menu($menu, basename(__FILE__), 4);
 
 Bootstrap4::heading("Go <a href='recipes.php'>here</a> to submit a request",4);
 
-
+error_reporting(0);
 
 
 if(isset($_POST['submit']))
@@ -57,7 +57,7 @@ $requestList = $pdo->result;
 $form->open();
 
 
-Bootstrap4::table(['Recipe','Course','Date','Remove']);
+Bootstrap4::table(['Recipe','Course','Date','Red','Green','Remove']);
 
 foreach($requestList as $request)
 {
@@ -67,7 +67,12 @@ foreach($requestList as $request)
     $request['box'] = "<input type='checkbox' value='1' name='remove_"
         .$request['id']."' />";
 
-    Bootstrap4::table_row([$request['title'],$request['course'],$request['date'], $request['box']]);
+    $request['redct'] = colorscale(0, $redline, $request['redct'], $colorindexRed);
+    $request['greenct'] = colorscale(0, $greenline, $request['greenct'], $colorindexgreen);
+
+    Bootstrap4::table_row([$request['title'],$request['course'],$request['date']
+        ,$request['redct'],$request['greenct']
+        , $request['box']]);
 
 
 }

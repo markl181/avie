@@ -25,7 +25,8 @@ ORDER BY
 ,        
          avie_food.name";
 
-$sqlGetFoodsForUpdate = "SELECT avie_food.id id, avie_food.name NAME, avie_level.name LEVEL FROM avie_food 
+$sqlGetFoodsForUpdate = "SELECT avie_food.id id, avie_food.name name, avie_level.name level 
+FROM avie_food 
 LEFT OUTER JOIN avie_level ON avie_food.level_id = avie_level.id
 WHERE avie_food.TIMESTAMP > 
 (SELECT max(TIMESTAMP) 
@@ -222,8 +223,33 @@ ORDER BY ar.course, ar.title";
 
 $sqlInsertUpdate = "INSERT INTO avie_update (type) VALUES (?)";
 
-$sqlGetRequests = "SELECT arr.id, arr.active, arr.date, ar.title, ar.course FROM avie_recipe_request arr 
+$sqlGetRequests = "SELECT arr.id, arr.active, arr.date, ar.title, ar.course 
+, redct, greenct
+FROM avie_recipe_request arr 
 INNER JOIN avie_recipe ar ON ar.public_id = arr.recipe_id
+LEFT OUTER JOIN
+(
+SELECT recipe_id, COUNT(DISTINCT food_id) redct
+FROM 
+avie_recipe_ingredient ari
+LEFT OUTER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
+LEFT OUTER JOIN avie_food af ON af.id = afi.food_id
+LEFT OUTER JOIN avie_level al ON al.id = af.level_id
+WHERE al.name = 'Red'
+GROUP BY recipe_id
+) redj ON redj.recipe_id = ar.public_id 
+LEFT OUTER JOIN
+(
+SELECT recipe_id, COUNT(DISTINCT food_id) greenct
+FROM 
+avie_recipe_ingredient ari
+LEFT OUTER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
+LEFT OUTER JOIN avie_food af ON af.id = afi.food_id
+LEFT OUTER JOIN avie_level al ON al.id = af.level_id
+WHERE al.name = 'Green'
+GROUP BY recipe_id
+) greenj ON greenj.recipe_id = ar.public_id 
+
 WHERE active = 1";
 
 $sqlUpdateRequestDate = "UPDATE avie_recipe_request SET date = ? WHERE id = ?";

@@ -28,6 +28,8 @@ $greenLimit = $_GET['greenlimit'];
 $course = $_GET['course'];
 $rating = $_GET['rating'];
 
+$approvedTags = ['Avie-Approved','Freezable'];
+
 $includeBlack = filter_var($includeBlack, FILTER_SANITIZE_NUMBER_INT);
 $redLimit = filter_var($redLimit, FILTER_SANITIZE_NUMBER_INT);
 $greenLimit = filter_var($greenLimit, FILTER_SANITIZE_NUMBER_INT);
@@ -219,7 +221,7 @@ $form->input('greenlimit','Min Green:',['type'=>'number','min'=>0,'max'=>10, 'va
 
 Bootstrap4::error_block('Check a box to request a recipe','info');
 
-Bootstrap4::table(['Title','Course','Rating','Time (m)','Photo','']);
+Bootstrap4::table(['Title','Course','Rating','Time (m)','Red','Green','Tags','Photo','']);
 
 /*
  * Add in course jumps
@@ -229,6 +231,23 @@ Bootstrap4::table(['Title','Course','Rating','Time (m)','Photo','']);
 
 foreach($recipeList as $key=>$recipeItem)
 {
+
+    display($recipeItem);
+
+    $sqlGetRecipeTags = "SELECT * FROM avie_recipe_tag art INNER JOIN
+    avie_tag a on art.tag_id = a.id
+where name in ?
+    and recipe_id = ? 
+
+";
+
+    $tagSearch = array_push($approvedTags, $recipeItem['public_id']);
+
+    $pdo->query($sqlGetRecipeTags, ['binds'=>[$tagSearch]]);
+
+    display($pdo->result);
+
+
     $recipeItem['time'] = $recipeItem['prep_time'] + $recipeItem['cook_time'];
     $recipeItem['time'] = ($recipeItem['time'] == 0) ? '' : $recipeItem['time'];
     $recipeItem['time'] = convertToHoursMins($recipeItem['time']);
@@ -242,12 +261,17 @@ foreach($recipeList as $key=>$recipeItem)
         $recipeItem['request'] = ' checked';
     }
 
+    $recipeItem['redct'] = colorscale(0, $redline, $recipeItem['redct'], $colorindexRed);
+    $recipeItem['greenct'] = colorscale(0, $greenline, $recipeItem['greenct'], $colorindexgreen);
+
+
     $recipeItem['request'] = "<input type='checkbox' value='1'".$recipeItem['request']." name='request_"
         .$recipeItem['public_id']."' />";
 
     Bootstrap4::table_row([
         $recipeItem['title']
         , $recipeItem['course'], $recipeItem['rating'], $recipeItem['time']
+        ,$recipeItem['redct'],$recipeItem['greenct']
         , $recipeItem['photo'], $recipeItem['request']
 
     ]);

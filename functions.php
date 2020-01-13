@@ -12,6 +12,99 @@ $redSpan = 'rgba(255, 0, 0, 0.6)';
 $yellowSpan = 'rgba(255, 255, 0, 0.6)';
 $blackSpan = 'rgba(20,20,20,0.9)';
 
+//white to green
+$colorindexgreen = lineargradient(
+    0, 255, 0,   // rgb of the last color
+    255, 255, 255, // rgb of the first color
+    100          // number of colors in your linear gradient
+    , 0.6
+);
+
+//white to red
+$colorindexRed = lineargradient(
+    255, 0, 0,   // rgb of the last color
+    255, 255, 255, // rgb of the first color
+    100          // number of colors in your linear gradient
+    , 0.6
+);
+
+/**
+ * colorscale function. Takes a min, max and color array and creates a span indicating the % complete by color
+ *
+ * @access public
+ * @param mixed $min
+ * @param mixed $max
+ * @param mixed $value
+ * @param mixed $colorindex
+ * @param bool  $cell
+ * @return string
+ */
+function colorscale($min, $max, $value, $colorindex, $cell = true)
+{
+    if($value < 0 || empty($value)) {
+        $value = 0;
+    }
+
+    $a = $max - $min;
+    $b = $value - $min;
+
+    $percentComplete = round(($b / $a) * count($colorindex));
+
+    if($percentComplete > 100) {
+        $percentComplete = 100;
+    }
+
+    if(isset($colorindex[$percentComplete - 1])) {
+        $spanColor = $colorindex[$percentComplete - 1];
+    }
+    else {
+        $spanColor = $colorindex[0];
+    }
+
+    if($cell != true) {
+        return $spanColor;
+    }
+    else {
+
+        // troubleshoot($value . "|" . $spanColor);
+
+        return $value . "|" . $spanColor;
+    }
+
+}
+
+/**
+ * lineargradient function. Mark Leci's rgb linear gradient function with opacity
+ *
+ * @access public
+ * @param mixed $ra
+ * @param mixed $ga
+ * @param mixed $ba
+ * @param mixed $rz
+ * @param mixed $gz
+ * @param mixed $bz
+ * @param mixed $iterationnr
+ * @param int   $opacity (default: 1)
+ * @return array
+ */
+function lineargradient($ra, $ga, $ba, $rz, $gz, $bz, $iterationnr, $opacity = 1)
+{
+    $colorindex = [];
+    for($iterationc = 1; $iterationc <= $iterationnr; $iterationc++) {
+        $iterationdiff = $iterationnr - $iterationc;
+
+        $colorindex[] = "rgba(" .
+
+            intval((($ra * $iterationc) + ($rz * $iterationdiff)) / $iterationnr) . ", " .
+            intval((($ga * $iterationc) + ($gz * $iterationdiff)) / $iterationnr) . ", " .
+            intval((($ba * $iterationc) + ($bz * $iterationdiff)) / $iterationnr) . ", " .
+            $opacity
+            . ")";
+    }
+
+    return $colorindex;
+}
+
 
 function errors($value=0)
 {
