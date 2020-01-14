@@ -228,25 +228,28 @@ Bootstrap4::table(['Title','Course','Rating','Time (m)','Red','Green','Tags','Ph
  *
  */
 
+//make query for tag search
+$inClause = str_repeat('?,', count($approvedTags) - 1) . '?';
+$sqlGetRecipeTags = "SELECT a.name FROM avie_recipe_tag art INNER JOIN
+    avie_tag a on art.tag_id = a.id
+where name in ($inClause)
+    and recipe_id = ? 
+";
+
 
 foreach($recipeList as $key=>$recipeItem)
 {
 
-    display($recipeItem);
+    $tagSearch = $approvedTags;
+    $tagSearch[] = $recipeItem['public_id'];
 
-    $sqlGetRecipeTags = "SELECT * FROM avie_recipe_tag art INNER JOIN
-    avie_tag a on art.tag_id = a.id
-where name in ?
-    and recipe_id = ? 
+    $pdo->query($sqlGetRecipeTags, ['binds'=>$tagSearch]);
 
-";
+    $recipeTags = $pdo->result;
 
-    $tagSearch = array_push($approvedTags, $recipeItem['public_id']);
+    $recipeTags = array_flatten($recipeTags,'name');
 
-    $pdo->query($sqlGetRecipeTags, ['binds'=>[$tagSearch]]);
-
-    display($pdo->result);
-
+    $recipeItem['tags'] = implode(",",$recipeTags);
 
     $recipeItem['time'] = $recipeItem['prep_time'] + $recipeItem['cook_time'];
     $recipeItem['time'] = ($recipeItem['time'] == 0) ? '' : $recipeItem['time'];
@@ -271,7 +274,7 @@ where name in ?
     Bootstrap4::table_row([
         $recipeItem['title']
         , $recipeItem['course'], $recipeItem['rating'], $recipeItem['time']
-        ,$recipeItem['redct'],$recipeItem['greenct']
+        ,$recipeItem['redct'],$recipeItem['greenct'],$recipeItem['tags']
         , $recipeItem['photo'], $recipeItem['request']
 
     ]);

@@ -724,12 +724,21 @@ function exec_time($startTime, $line, $round = 1)
 
 }
 
-function array_flatten($array, $keyColumn, $valueColumn)
+function array_flatten($array, $keyColumn, $valueColumn='')
 {
 
     foreach($array as $key => $row)
     {
-        $returnArray[$row[$keyColumn]] = $row[$valueColumn];
+
+        if($valueColumn <> '')
+        {
+            $returnArray[$row[$keyColumn]] = $row[$valueColumn];
+        }
+        else
+        {
+            $returnArray[$row[$keyColumn]] = $row[$keyColumn];
+        }
+
 
 
     }
