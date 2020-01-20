@@ -713,6 +713,36 @@ function display($variable, $heading = '')
 
 }
 
+function sortFilesByModified($path,$extension='csv')
+{
+    $results = array();
+
+    $handler = opendir($path);
+
+    while ($file = readdir($handler)) {
+
+        $info = new SplFileInfo($file);
+        if($info->getExtension() == $extension)
+        {
+
+            $results[] = array('file' => $file, 'time' => filemtime($file));
+
+
+        }
+
+    }
+
+    closedir($handler);
+
+    uasort($results, function($file1, $file2) {
+        if ( $file1['time'] == $file2['time'] )
+            return 0;
+        return $file1['time'] < $file2['time'] ? -1 : 1;
+    });
+
+    return $results;
+
+}
 
 function exec_time($startTime, $line, $round = 1)
 {

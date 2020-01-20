@@ -40,76 +40,87 @@ $start = microtime(true);
 error_reporting(1);
 
 $fileName = 'plantoeat-recipes.csv';
+
+$path = $_SERVER['SCRIPT_FILENAME'];
+$info = pathinfo($path);
+$path = $info['dirname'];
+$archiveFolder = 'archive';
+
+$filesArray = sortFilesByModified($path);
+
+
 $rowLimit = 500000;
 
-$file = fopen($fileName, 'r');
-
-$i = 0;
-
-while (($data = fgetcsv($file, 0, ",")) !==FALSE && $i <= $rowLimit)
+foreach($filesArray as $fileItem)
 {
-    // Read the data
-    if($i == 0)
+    $file = fopen($fileItem['file'], 'r');
+
+    $i = 0;
+
+    while (($data = fgetcsv($file, 0, ",")) !==FALSE && $i <= $rowLimit)
     {
-        display($data);
-    }
-
-
-    if($i > 0)
-    {
-        //exclude header row
-        set_time_limit(30);
-        $title = $data[0];
-        $course = $data[1];
-        $mainIngredient = $data[3];
-        $url = $data[6];
-        $website = $data[7];
-        $prepTime = $data[8];
-        $cookTime = $data[9];
-        $servings = $data[11];
-        $yield = $data[12];
-        $ingredients = $data[13];
-        $tags = $data[15];
-        $rating = $data[16];
-        $publicUrl = $data[17];
-        $photo = $data[18];
-        $updatedAt = $data[31];
-
-        //initial processing
-        $tags = explode(", ",$tags);
-        $ingredients = explode("\n",$ingredients);
-        $publicId = str_ireplace('https://www.plantoeat.com/recipes/','',$publicUrl);
-
-        $pdo->logFind = true;
-
-        foreach($tags as $tag) {
-            if($tag <> '') {
-                //check if the record already exists and insert it if not
-                $pdo->idColumn = 'id';
-                $pdo->searchColumn = 'name';
-                $pdo->searchTable = 'avie_tag';
-                $pdo->searchValue = $tag;
-                $pdo->insertQuery = $sqlInsertTag;
-                $pdo->insertBinds = [$tag];
-
-                $pdo->find_id();
-                $tagId = $pdo->recordId;
-
-                //check if the tag exists for the recipe
-                $pdo->query($sqlSelectRecipeTag, ['binds'=>[$publicId, $tagId], 'fetch'=>'one']);
-                $recipeTag = $pdo->result;
-
-                if(!$recipeTag)
-                {
-
-                    $pdo->query($sqlInsertRecipeTag, ['binds'=>[$publicId, $tagId], 'type'=>'insert']);
-                    echo "Recipe Tag Created for recipe $publicId<br/>";
-                }
-
-                //@@todo do we want to remove any tags that were removed?
-
-            }
+        // Read the data
+        if($i == 0)
+        {
+            display($data);
         }
+
+
+        if($i > 0)
+        {
+            //exclude header row
+            set_time_limit(30);
+            $title = $data[0];
+            $course = $data[1];
+            $mainIngredient = $data[3];
+            $url = $data[6];
+            $website = $data[7];
+            $prepTime = $data[8];
+            $cookTime = $data[9];
+            $servings = $data[11];
+            $yield = $data[12];
+            $ingredients = $data[13];
+            $tags = $data[15];
+            $rating = $data[16];
+            $publicUrl = $data[17];
+            $photo = $data[18];
+            $updatedAt = $data[31];
+
+            //initial processing
+            $tags = explode(", ",$tags);
+            $ingredients = explode("\n",$ingredients);
+            $publicId = str_ireplace('https://www.plantoeat.com/recipes/','',$publicUrl);
+
+            $pdo->logFind = true;
+
+            foreach($tags as $tag) {
+                if($tag <> '') {
+                    //check if the record already exists and insert it if not
+                    $pdo->idColumn = 'id';
+                    $pdo->searchColumn = 'name';
+                    $pdo->searchTable = 'avie_tag';
+                    $pdo->searchValue = $tag;
+                    $pdo->insertQuery = $sqlInsertTag;
+                    $pdo->insertBinds = [$tag];
+
+                    $pdo->find_id();
+                    $tagId = $pdo->recordId;
+
+                    //check if the tag exists for the recipe
+                    $pdo->query($sqlSelectRecipeTag, ['binds'=>[$publicId, $tagId], 'fetch'=>'one']);
+                    $recipeTag = $pdo->result;
+
+                    if(!$recipeTag)
+                    {
+
+                        $pdo->query($sqlInsertRecipeTag, ['binds'=>[$publicId, $tagId], 'type'=>'insert']);
+                        echo "Recipe Tag Created for recipe $publicId<br/>";
+                    }
+
+                    //@@todo do we want to remove any tags that were removed?
+
+                }
+            }
 
             if($title <> '' && is_numeric($publicId))
             {
@@ -178,7 +189,8 @@ while (($data = fgetcsv($file, 0, ",")) !==FALSE && $i <= $rowLimit)
                         if(!$recipeIngredient)
                         {
 
-                            $pdo->query($sqlInsertRecipeIngredient, ['binds'=>[$publicId, $ingredientId], 'type'=>'insert']);
+                            $pdo->query($sqlInsertRecipeIngredient, ['binds'=>[$publicId, $ingredientId]
+                                , 'type'=>'insert']);
                             echo "Recipe Ingredient Created for recipe $publicId<br/>";
                         }
 
@@ -199,11 +211,21 @@ while (($data = fgetcsv($file, 0, ",")) !==FALSE && $i <= $rowLimit)
 
 
 
-    $i++;
+        $i++;
+
+    }
+
+    fclose($file);
+
+    //now archive the file
+    if(rename($fileItem['file'],$archiveFolder."/".$fileItem['file']))
+    {
+        echo $fileItem['file']." archived";
+    }
+
+
 
 }
-
-fclose($file);
 
 exec_time($start, __LINE__);
 
