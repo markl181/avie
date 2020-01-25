@@ -37,8 +37,6 @@ include 'header_log.php';
 
 $start = microtime(true);
 
-error_reporting(1);
-
 $fileName = 'plantoeat-recipes.csv';
 
 $path = $_SERVER['SCRIPT_FILENAME'];
@@ -47,7 +45,6 @@ $path = $info['dirname'];
 $archiveFolder = 'archive';
 
 $filesArray = sortFilesByModified($path);
-
 
 $rowLimit = 500000;
 
@@ -229,7 +226,7 @@ foreach($filesArray as $fileItem)
 
 exec_time($start, __LINE__);
 
-$pdo->query($sqlInsertUpdate, ['binds'=>['1'], ['type'=>'insert']]);
+$pdo->query($sqlInsertUpdate, ['binds'=>['1'], 'type'=>'insert']);
 
 
 //include 'footer.php';

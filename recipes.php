@@ -27,6 +27,7 @@ $redLimit = $_GET['redlimit'];
 $greenLimit = $_GET['greenlimit'];
 $course = $_GET['course'];
 $rating = $_GET['rating'];
+$keyword = $_GET['keyword'];
 
 $approvedTags = ['Avie-Approved','Freezable'];
 
@@ -114,8 +115,17 @@ WHERE afi.food_id = ?)";
     $filters[] = 2;
 
 }
+else if ($keyword||$redLimit||$greenLimit||$rating||$course)
+{
+    //query all the recipes and just eliminate the filtered ones
+    $pdo->query($sqlGetAllRecipes);
+
+
+}
 else
 {
+    //default form if nothing is set
+
     $pdo->query($sqlGetRecipesWithRating);
 
     $filters[] = 1;
@@ -131,30 +141,49 @@ $recipeList = $pdo->result;
         if($previousId == $recipe['public_id'])
         {
             unset($recipeList[$key]);
+            continue;
 
         }
         if($rating <> '' && $recipe['rating'] < $rating)
         {
             unset($recipeList[$key]);
-
+            continue;
         }
         if($course <> '' && $recipe['course'] <> $course)
         {
             unset($recipeList[$key]);
+            continue;
         }
         if($includeBlack != 1 && $recipe['blackct'] >0)
         {
             unset($recipeList[$key]);
+            continue;
         }
         if($redLimit <> '' && $redLimit >=0 && $recipe['redct'] >= $redLimit)
         {
             unset($recipeList[$key]);
-
+            continue;
         }
         if($greenLimit >0 && $recipe['greenct'] < $greenLimit)
         {
 
             unset($recipeList[$key]);
+            continue;
+
+        }
+        if($keyword <> '' )
+        {
+
+            if(stripos($recipe['title'],$keyword) === FALSE
+                &&
+                stripos($recipe['main_ingredient'],$keyword) === FALSE)
+            {
+                //just add in any additonal search fields above
+                unset($recipeList[$key]);
+                continue;
+
+            }
+
 
         }
 
@@ -186,7 +215,7 @@ $recipeCount = count($recipeList);
             {
                 if($filter == 1)
                 {
-                    $text.= 'only rated recipes';
+                    $text.= 'only top rated recipes';
 
                 }
                 if($filter == 2)
@@ -207,13 +236,20 @@ $recipeCount = count($recipeList);
         }
 
 
+$pdo->query($sqlGetCourses, ['fetch' => 'all']);
+$coursesList = $pdo->result;
+
 //Form
 $form->open('get');
+$form->input('keyword','Keyword: ',['type'=>'text','value'=>$keyword]);
 $form->select('rating','Rating: ',[3=>'Rating >=3', 4=>'Rating >=4'
     , 5=>'Rating 5'], $rating);
-$form->select('course','Course: ',[''=>'','Appetizer'=>'Appetizer','Breakfast'=>'Breakfast'
+$form->selectquery('course', 'Course: ', $coursesList, 'course'
+    , 'course',$course);
+/*$form->select('course','Course: ',[''=>'','Appetizers'=>'Appetizers','Beverages'=>'Beverages'
+    ,'Breakfast'=>'Breakfast'
     ,'Dessert'=>'Dessert','Main Course'=>'Main Course','Salad'=>'Salad'
-    ,'Sides'=>'Sides','Soup'=>'Soup'], $course);
+    ,'Sides'=>'Sides','Soup'=>'Soup'], $course);*/
 $form->input('redlimit','Max Red:',['type'=>'number','min'=>0,'max'=>10, 'value'=>$redLimit]);
 $form->input('greenlimit','Min Green:',['type'=>'number','min'=>0,'max'=>10, 'value'=>$greenLimit]);
 
