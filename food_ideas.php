@@ -17,7 +17,10 @@ $ingredientList = $pdo->result;
 $ingredientCount = count($ingredientList);
 
 Bootstrap4::heading("Since last update",4);
-Bootstrap4::heading("$ingredientCount unlinked ingredients that might give you an idea of foods to add",5);
+Bootstrap4::heading("$ingredientCount unlinked ingredients that might give you an idea of foods to add"
+    ,5);
+Bootstrap4::error_block("Foods that show up in recipes but aren't linked to any searchable ingredient."
+    ,'info');
 
 $pdo->query($sqlGetRecipesByInclude);
 $recipeList = $pdo->result;
@@ -48,8 +51,6 @@ foreach($recipeList as $recipe)
 Bootstrap4::heading("$emptyCt Recipes with no red or green ingredients",5);
 Bootstrap4::heading("$noRedCt Recipes with no red ingredients",5);
 Bootstrap4::heading("$noGreenCt Recipes with no green ingredients",5);
-
-
 
 Bootstrap4::table(['Ingredient','Count']);
 

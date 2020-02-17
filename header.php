@@ -37,7 +37,7 @@ $ipList = ['127.0.0.1', '75.156.174.108', '::1'];
 require 'connect.php';
 
 
-error_reporting(E_ALL);
+error_reporting(E_ERROR);
 
 require_once 'functions.php';
 require_once 'qrs.php';

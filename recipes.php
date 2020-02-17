@@ -84,6 +84,7 @@ else if($includes) {
     if($includeCount == 1) {
 
         $sqlSearch = $sqlGetRecipesByInclude . $sqlFinishOneInclude;
+
         $pdo->query($sqlSearch, ['binds' => [$includes[0]]]);
 
     }
@@ -159,7 +160,7 @@ $recipeList = $pdo->result;
             unset($recipeList[$key]);
             continue;
         }
-        if($redLimit <> '' && $redLimit >=0 && $recipe['redct'] >= $redLimit)
+        if($redLimit <> '' && $redLimit >=0 && $recipe['redct'] > $redLimit)
         {
             unset($recipeList[$key]);
             continue;

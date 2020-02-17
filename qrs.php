@@ -61,10 +61,46 @@ $sqlInsertRecipeIngredient = "INSERT INTO avie_recipe_ingredient (recipe_id, ing
 
 $sqlFilterRecipeByIngredient = "SELECT DISTINCT ar.* 
 , arr.id request_id
+, ifnull(blackct,0) blackct
+, ifnull(redct,0) redct
+, ifnull(greenct,0) greenct
 from avie_recipe ar
 INNER JOIN avie_recipe_ingredient ari ON ari.recipe_id = ar.public_id
 INNER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
 LEFT OUTER JOIN avie_recipe_request arr ON arr.recipe_id = ar.public_id AND arr.active = 1
+LEFT OUTER JOIN
+(
+SELECT recipe_id, COUNT(DISTINCT food_id) blackct
+FROM 
+avie_recipe_ingredient ari
+LEFT OUTER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
+LEFT OUTER JOIN avie_food af ON af.id = afi.food_id
+LEFT OUTER JOIN avie_level al ON al.id = af.level_id
+WHERE al.name = 'Black'
+GROUP BY recipe_id
+) blackj ON blackj.recipe_id = ar.public_id 
+LEFT OUTER JOIN
+(
+SELECT recipe_id, COUNT(DISTINCT food_id) redct
+FROM 
+avie_recipe_ingredient ari
+LEFT OUTER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
+LEFT OUTER JOIN avie_food af ON af.id = afi.food_id
+LEFT OUTER JOIN avie_level al ON al.id = af.level_id
+WHERE al.name = 'Red'
+GROUP BY recipe_id
+) redj ON redj.recipe_id = ar.public_id 
+LEFT OUTER JOIN
+(
+SELECT recipe_id, COUNT(DISTINCT food_id) greenct
+FROM 
+avie_recipe_ingredient ari
+LEFT OUTER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
+LEFT OUTER JOIN avie_food af ON af.id = afi.food_id
+LEFT OUTER JOIN avie_level al ON al.id = af.level_id
+WHERE al.name = 'Green'
+GROUP BY recipe_id
+) greenj ON greenj.recipe_id = ar.public_id 
 WHERE afi.food_id = ?
 ORDER BY ar.course, ar.title
 ";
@@ -81,12 +117,15 @@ LEFT OUTER JOIN avie_level al ON al.id = af.level_id
 ORDER BY course, title";
 
 $sqlGetRecipesByInclude = "
-SELECT ar.*
+SELECT DISTINCT ar.*
 , ifnull(blackct,0) blackct
 , ifnull(redct,0) redct
 , ifnull(greenct,0) greenct
 , arr.id request_id
 FROM avie_recipe ar 
+INNER JOIN avie_recipe_ingredient ari ON ari.recipe_id = ar.public_id
+LEFT OUTER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
+LEFT OUTER JOIN avie_food af ON af.id = afi.food_id
 LEFT OUTER JOIN avie_recipe_tag art ON art.recipe_id = ar.public_id
 LEFT OUTER JOIN avie_tag att ON att.id = art.tag_id
 LEFT OUTER JOIN avie_recipe_request arr ON arr.recipe_id = ar.public_id AND arr.active = 1

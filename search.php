@@ -110,6 +110,7 @@ Bootstrap4::heading('Food List',2);
 $form->checkbox('includeblack','Include Recipes with Black Labelled Ingredients');
 $form->input('redlimit','Limit to x red ingredients',['type'=>'number','min'=>0,'max'=>99]);
 Bootstrap4::linebreak(2);
+$form->submit('submit','Search');
 Bootstrap4::table(['Food','Level','Include']);
 
 foreach($foodListAr as $food)
@@ -127,7 +128,7 @@ $food['name'] = food_colour($food['name'],$food['level']);
 
 Bootstrap4::table_close();
 
-$form->submit();
+$form->submit('submit','Search');
 $form->close();
 
 
