@@ -19,7 +19,8 @@ $ingredientCount = count($ingredientList);
 Bootstrap4::heading("Since last update",4);
 Bootstrap4::heading("$ingredientCount unlinked ingredients that might give you an idea of foods to add"
     ,5);
-Bootstrap4::error_block("Foods that show up in recipes but aren't linked to any searchable ingredient."
+Bootstrap4::error_block("Foods that show up in recipes but aren't linked to any searchable ingredient. To link one
+click the ingredient and edit as needed on the foods page. Please note this list is only updated every 15 minutes"
     ,'info');
 
 $pdo->query($sqlGetRecipesByInclude);

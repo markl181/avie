@@ -52,6 +52,12 @@ $pdo = new simple_pdo($host, $dbname, $user, $pass);
 use \tools\form4;
 $form = new form4;
 
+//set the recipe count variable
+$pdo->query($sqlGetRecipeCount,['fetch'=>'one']);
+$recipeCt = $pdo->result['ct'];
+Bootstrap4::$recipeCount = $recipeCt;
+
+
 $today = get_date('Y-m-d');
 
 $redline = 5;

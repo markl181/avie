@@ -308,7 +308,7 @@ echo "<select class='form-control col-sm-$fieldSize' id='$name' name='$name'>";
 
 		foreach ($values as $value=>$text)
 		{
-			if ($value == $selected)
+			if ($value == $selected && $selected <> '')
 				{echo "<option selected='selected' value='$value'>$text</option>";}
 			else
 				{echo "<option value='$value'>$text</option>";}

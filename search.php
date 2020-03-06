@@ -3,7 +3,7 @@
 Created by Mark Leci - 2019-12-26
 
 */
-$pageTitle = 'Avie - Recipe Search';
+$pageTitle = 'Avie - Search';
 
 if(isset($_POST['submit']))
 {

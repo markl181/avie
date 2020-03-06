@@ -37,8 +37,6 @@ include 'header_log.php';
 
 $start = microtime(true);
 
-$fileName = 'plantoeat-recipes.csv';
-
 $path = $_SERVER['SCRIPT_FILENAME'];
 $info = pathinfo($path);
 $path = $info['dirname'];
@@ -47,6 +45,13 @@ $archiveFolder = 'archive';
 $filesArray = sortFilesByModified($path);
 
 $rowLimit = 500000;
+
+if(count($filesArray) == 0)
+{
+    echo "No files found<br/>";
+
+
+}
 
 foreach($filesArray as $fileItem)
 {

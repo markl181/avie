@@ -28,14 +28,28 @@ $greenLimit = $_GET['greenlimit'];
 $course = $_GET['course'];
 $rating = $_GET['rating'];
 $keyword = $_GET['keyword'];
+$tag = $_GET['tag'];
 
 $approvedTags = ['Avie-Approved','Freezable'];
+
+
+foreach($approvedTags as $approvedTag)
+{
+    $tagSelect[] = $approvedTag;
+
+
+}
+
+
+
 
 $includeBlack = filter_var($includeBlack, FILTER_SANITIZE_NUMBER_INT);
 $redLimit = filter_var($redLimit, FILTER_SANITIZE_NUMBER_INT);
 $greenLimit = filter_var($greenLimit, FILTER_SANITIZE_NUMBER_INT);
 $course = filter_var($course, FILTER_SANITIZE_STRING);
 $rating = filter_var($rating, FILTER_SANITIZE_NUMBER_INT);
+$tag = filter_var($rating, FILTER_SANITIZE_NUMBER_INT);
+//@@todo - build tag filter
 
 foreach($_GET as $key=>$item)
 {
@@ -247,6 +261,7 @@ $form->select('rating','Rating: ',[3=>'Rating >=3', 4=>'Rating >=4'
     , 5=>'Rating 5'], $rating);
 $form->selectquery('course', 'Course: ', $coursesList, 'course'
     , 'course',$course);
+$form->select('tag','Tag: ',$tagSelect, $tag);
 /*$form->select('course','Course: ',[''=>'','Appetizers'=>'Appetizers','Beverages'=>'Beverages'
     ,'Breakfast'=>'Breakfast'
     ,'Dessert'=>'Dessert','Main Course'=>'Main Course','Salad'=>'Salad'
@@ -257,6 +272,37 @@ $form->input('greenlimit','Min Green:',['type'=>'number','min'=>0,'max'=>10, 'va
 
 
 Bootstrap4::error_block('Check a box to request a recipe','info');
+
+//jumps go here
+
+$courseCountAr = array();
+
+foreach($recipeList as $recipe) {
+
+    $courseCountAr[$recipe['course']]++;
+
+}
+
+$courseArray = array_flatten($recipeList,'course');
+
+//generate a flat set of buttons here
+foreach($courseArray as $courseBt)
+{
+    if($courseBt <> '')
+    {
+
+        $courseCount = $courseCountAr[$courseBt];
+
+
+        Bootstrap4::button("$courseBt ($courseCount)", ['href'=>"#$courseBt"]);
+        //add the button link here
+    }
+
+
+}
+Bootstrap4::linebreak(2);
+
+
 
 Bootstrap4::table(['Title','Course','Rating','Time (m)','Red','Green','Tags','Photo','']);
 
@@ -273,6 +319,7 @@ where name in ($inClause)
     and recipe_id = ? 
 ";
 
+$previousCourse = '';
 
 foreach($recipeList as $key=>$recipeItem)
 {
@@ -308,13 +355,29 @@ foreach($recipeList as $key=>$recipeItem)
     $recipeItem['request'] = "<input type='checkbox' value='1'".$recipeItem['request']." name='request_"
         .$recipeItem['public_id']."' />";
 
-    Bootstrap4::table_row([
-        $recipeItem['title']
-        , $recipeItem['course'], $recipeItem['rating'], $recipeItem['time']
-        ,$recipeItem['redct'],$recipeItem['greenct'],$recipeItem['tags']
-        , $recipeItem['photo'], $recipeItem['request']
+    if($previousCourse <> $recipeItem['course'])
+    {
+        Bootstrap4::table_row([
+            $recipeItem['title']
+            , $recipeItem['course'], $recipeItem['rating'], $recipeItem['time']
+            ,$recipeItem['redct'],$recipeItem['greenct'],$recipeItem['tags']
+            , $recipeItem['photo'], $recipeItem['request']
 
-    ]);
+        ],['id'=>$recipeItem['course']]);
+
+    }
+    else
+    {
+        Bootstrap4::table_row([
+            $recipeItem['title']
+            , $recipeItem['course'], $recipeItem['rating'], $recipeItem['time']
+            ,$recipeItem['redct'],$recipeItem['greenct'],$recipeItem['tags']
+            , $recipeItem['photo'], $recipeItem['request']
+
+        ]);
+    }
+
+
 
 
 

@@ -115,6 +115,23 @@ to edit"
 
 Bootstrap4::linebreak(2);
 Bootstrap4::heading('Food List',2);
+
+//summary goes here
+Bootstrap4::table(['Level','# of Foods'],'table text-center table-striped table-sm table-hover');
+$total = 0;
+foreach($levelsList as $level)
+{
+
+    //make each link clickable and jump to that section of the table
+
+    Bootstrap4::table_row([$level['name'], $level['foods']]);
+    $total += $level['foods'];
+
+}
+Bootstrap4::table_row(['Total',"$total"]);
+//@@todo - automate making the total row and having it as bold
+Bootstrap4::table_close();
+
 Bootstrap4::table(['Food','Level']);
 
 $rowClass = 'text-left clickable-row';

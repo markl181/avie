@@ -1,6 +1,7 @@
 <?php
 /**
- * bootstrap class. Mark Leci 2015
+ * bootstrap master class. Mark Leci 2015
+ * Copy to all new projects
  */
 
 
@@ -22,6 +23,9 @@ class Bootstrap4
      * @var int
      */
     public static $defaultFieldSize = 6;
+    public static $recipeCount;
+    private static $attributesOutput;
+    private static $classOutput;
 
     //allow class options in constructor (research that)
 
@@ -54,11 +58,11 @@ class Bootstrap4
      */
     public static function heading($content, $level = 1, $class = 'text-center')
     {
-      //  echo "<div class='row'>";
+        //  echo "<div class='row'>";
         echo "<h$level class='$class'>";
         echo $content;
         echo "</h$level>";
-       //echo "</div>";
+        //echo "</div>";
 
     }
 
@@ -264,13 +268,10 @@ class Bootstrap4
         $tagString = "<$tagName ";
 
         //loop through attributes
-        if(is_array($attributesArray) && count($attributesArray) > 0) {
-            foreach($attributesArray as $attr => $val) {
-                $tagString .= " $attr='$val'";
+        self::attributes($attributesArray);
+        $tagString .= " class='".self::$classOutput."'";
+        $tagString .= self::$attributesOutput;
 
-
-            }
-        }
         //close tag
         $tagString .= ">";
         $tagString .= $content;
@@ -492,6 +493,31 @@ class Bootstrap4
 
 
         return $return;
+
+    }
+
+    private static function attributes($attributesArray)
+    {
+
+        self::$attributesOutput = '';
+
+        if(is_array($attributesArray)) {//loop through attributes
+            foreach($attributesArray as $attr => $val) {
+
+                if($attr == 'class')
+                {
+                    self::$classOutput .= " $val";
+                }
+                else
+                {
+                    self::$attributesOutput .= " $attr='$val'";
+                }
+
+
+
+            }
+        }
+
 
     }
 
@@ -728,6 +754,8 @@ class Bootstrap4
      */
     public static function table_close_hidden()
     {
+        $return = '';
+
         //end table
         $return .= self::tag_close_hidden('tbody');
         $return .= self::tag_close_hidden('table');
@@ -848,7 +876,7 @@ class Bootstrap4
 
         //display the whole list as one heading
         self::heading($output, $level);
-
+        Bootstrap4::heading(self::$recipeCount." Recipes",4);
 
     }
 
@@ -955,29 +983,42 @@ class Bootstrap4
      * @param string $class
      * @param null   $attributesArray
      */
-    public static function button($name, $class = 'btn btn-primary', $attributesArray = null)
+    public static function button($name, $attributesArray = null)
     {
 
+        self::$classOutput = 'btn btn-primary';
+        $attributes['value'] = $name;
+        $attributes['role'] = 'button';
 
-        //open tag
-        $tagString = "<a ";
-        $tagString .= "value='$name' ";
-        $tagString .= "role='button' ";
-        $tagString .= "class='$class' ";
-
-        //loop through attributes
-        if(is_array($attributesArray) && count($attributesArray) > 0) {
-            foreach($attributesArray as $attr => $val) {
-                $tagString .= " $attr='$val'";
-
-
-            }
+        if($attributesArray)
+        {
+            $attributes = array_merge($attributes, $attributesArray);
         }
 
-        $tagString .=">";
-        $tagString .= $name;
-        $tagString .= "</a>";
-        echo $tagString;
+        //troubleshoot($attributes);
+
+        self::tag_open('a',$attributes,$name,true);
+
+
+    }
+
+    public static function button_group($nameArray, $attributesArray = ['class'=>"btn btn-secondary"])
+    {
+        self::tag_open('div',['role'=>'group', 'aria-label'=>'Basic example']);
+
+        foreach($nameArray as $button)
+        {
+            if($button <> '')
+            {
+                self::button($button, $attributesArray);
+            }
+
+
+
+        }
+
+        self::tag_close('div');
+
 
     }
 

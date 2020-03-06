@@ -20,10 +20,7 @@ $sqlGetMeals = "SELECT id, ord, name FROM meal ORDER BY ord";
 $sqlGetFoodGroups = "SELECT id, name, ord, notes FROM food_group ORDER BY ord";
 $sqlGetFoods = "SELECT avie_food.id id, avie_food.name name, avie_level.name level FROM avie_food 
 LEFT OUTER JOIN avie_level ON avie_food.level_id = avie_level.id
-ORDER BY 
-         level_id
-,        
-         avie_food.name";
+ORDER BY level_id, avie_food.name";
 
 $sqlGetFoodsForUpdate = "SELECT avie_food.id id, avie_food.name name, avie_level.name level 
 FROM avie_food 
@@ -46,7 +43,10 @@ $sqlGetFoodById = "SELECT avie_food.id, avie_food.name name, avie_level.id level
 LEFT OUTER JOIN avie_level ON avie_food.level_id = avie_level.id
 WHERE avie_food.id = ?
 ORDER BY avie_food.name";
-$sqlGetLevels = "SELECT id, name FROM avie_level ORDER BY id";
+$sqlGetLevels = "SELECT al.id, al.name, count(af.id) foods FROM avie_level al
+LEFT OUTER JOIN avie_food af ON af.level_id = al.id
+GROUP BY al.id, al.name
+ ORDER BY id";
 
 $sqlGetCourses = "SELECT DISTINCT course FROM avie_recipe ORDER BY 1";
 
@@ -107,6 +107,8 @@ ORDER BY ar.course, ar.title
 
 $sqlGetRecipeByPublicId = "SELECT id, updated_at FROM avie_recipe WHERE public_id = ?";
 $sqlGetRecipes = "SELECT * from avie_recipe ORDER BY course, title";
+$sqlGetRecipeCount = "SELECT count(1) AS ct from avie_recipe";
+$sqlGetRecipeCourseCount = "SELECT count(1) AS ct from avie_recipe WHERE course = ?";
 $sqlGetRecipesWithDetails = "SELECT * from avie_recipe ar 
 LEFT OUTER JOIN avie_recipe_tag art ON art.recipe_id = ar.public_id
 LEFT OUTER JOIN avie_tag att ON att.id = art.tag_id
@@ -314,6 +316,7 @@ $sqlInsertUpdate = "INSERT INTO avie_update (type) VALUES (?)";
 
 $sqlGetRequests = "SELECT arr.id, arr.active, arr.date, ar.title, ar.course 
 , redct, greenct
+, public_url
 FROM avie_recipe_request arr 
 INNER JOIN avie_recipe ar ON ar.public_id = arr.recipe_id
 LEFT OUTER JOIN

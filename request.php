@@ -11,8 +11,6 @@ Bootstrap4::menu($menu, basename(__FILE__), 4);
 
 Bootstrap4::heading("Go <a href='recipes.php'>here</a> to submit a request",4);
 
-error_reporting(0);
-
 
 if(isset($_POST['submit']))
 {
@@ -69,6 +67,8 @@ foreach($requestList as $request)
 
     $request['redct'] = colorscale(0, $redline, $request['redct'], $colorindexRed);
     $request['greenct'] = colorscale(0, $greenline, $request['greenct'], $colorindexgreen);
+
+    $request['title'] = $request['title']."||".$request['public_url'];
 
     Bootstrap4::table_row([$request['title'],$request['course'],$request['date']
         ,$request['redct'],$request['greenct']

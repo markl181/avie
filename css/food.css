@@ -21,3 +21,8 @@ h1, h2, h3, h4, h5, th, p, tr, div
 
 }
 */
+
+a.btn-primary a.btn-secondary a[role="button"]{
+
+    color: white !important;
+}
