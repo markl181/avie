@@ -48,7 +48,9 @@ $redLimit = filter_var($redLimit, FILTER_SANITIZE_NUMBER_INT);
 $greenLimit = filter_var($greenLimit, FILTER_SANITIZE_NUMBER_INT);
 $course = filter_var($course, FILTER_SANITIZE_STRING);
 $rating = filter_var($rating, FILTER_SANITIZE_NUMBER_INT);
-$tag = filter_var($rating, FILTER_SANITIZE_NUMBER_INT);
+$keyword = filter_var($keyword, FILTER_SANITIZE_STRING);
+$tag = filter_var($tag, FILTER_SANITIZE_NUMBER_INT);
+
 //@@todo - build tag filter
 
 foreach($_GET as $key=>$item)
@@ -130,11 +132,14 @@ WHERE afi.food_id = ?)";
     $filters[] = 2;
 
 }
-else if ($keyword||$redLimit||$greenLimit||$rating||$course)
+else if ($keyword||$redLimit||$greenLimit||$rating||$course||$tag<>''||$includeBlack)
 {
+
     //query all the recipes and just eliminate the filtered ones
     $pdo->query($sqlGetAllRecipes);
 
+    $filters[] = 4;
+    //@@todo - add in filter names here and then change the filter display below
 
 }
 else
@@ -147,6 +152,8 @@ else
 }
 
 $recipeList = $pdo->result;
+
+//troubleshoot($recipeList);
 
     $previousId = '';
 
@@ -201,6 +208,34 @@ $recipeList = $pdo->result;
 
 
         }
+        if($tag <> '')
+        {
+
+            //check to see if the recipe has tags
+            $pdo->query($sqlGetRecipeTags, ['binds'=>[$recipe['public_id']],'fetch'=>'one']);
+            $recipeTagResult = $pdo->result['tags'];
+
+            if(!$recipeTagResult)
+            {
+                //this recipe has no tags so exclude it and move on
+                unset($recipeList[$key]);
+                continue;
+            }
+            else
+            {
+                //grab the tag text
+                $tagText = $approvedTags[$tag];
+
+                if(stripos($recipeTagResult,$tagText) === FALSE)
+                {
+                    unset($recipeList[$key]);
+                    continue;
+
+                }
+            }
+
+
+        }
 
         //how to handle the includes now - just a straght query with IN clause?
 
@@ -243,10 +278,20 @@ $recipeCount = count($recipeList);
                     $text.= 'only specific ingredient';
 
                 }
+                if($filter == 4)
+                {
+
+                    $text = FALSE;
+
+                }
 
             }
 
-            Bootstrap4::error_block("Filtered - $text",'info');
+            if($text !== FALSE)
+            {
+                Bootstrap4::error_block("Filtered - $text",'info');
+            }
+
 
         }
 

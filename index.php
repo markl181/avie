@@ -8,6 +8,7 @@ Bootstrap4::menu($menu, basename(__FILE__),4);
 Bootstrap4::heading("Latest good things",2);
 Bootstrap4::heading("Mar 2020",4);
 Bootstrap4::list_group(["Added recipe counts on every page","Added food counts on the food pages"
+    ,"Added buttons with counts on the recipe search page","Added a tag search option"
 ]);
 Bootstrap4::linebreak(2);
 Bootstrap4::heading("Feb 2020",4);

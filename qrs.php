@@ -64,10 +64,13 @@ $sqlFilterRecipeByIngredient = "SELECT DISTINCT ar.*
 , ifnull(blackct,0) blackct
 , ifnull(redct,0) redct
 , ifnull(greenct,0) greenct
+, GROUP_CONCAT(att.name)
 from avie_recipe ar
 INNER JOIN avie_recipe_ingredient ari ON ari.recipe_id = ar.public_id
 INNER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
 LEFT OUTER JOIN avie_recipe_request arr ON arr.recipe_id = ar.public_id AND arr.active = 1
+LEFT OUTER JOIN avie_recipe_tag art ON art.recipe_id = ar.public_id
+LEFT OUTER JOIN avie_tag att ON att.id = art.tag_id       
 LEFT OUTER JOIN
 (
 SELECT recipe_id, COUNT(DISTINCT food_id) blackct
@@ -109,6 +112,12 @@ $sqlGetRecipeByPublicId = "SELECT id, updated_at FROM avie_recipe WHERE public_i
 $sqlGetRecipes = "SELECT * from avie_recipe ORDER BY course, title";
 $sqlGetRecipeCount = "SELECT count(1) AS ct from avie_recipe";
 $sqlGetRecipeCourseCount = "SELECT count(1) AS ct from avie_recipe WHERE course = ?";
+$sqlGetRecipeTags = "SELECT 
+ GROUP_CONCAT(att.name) tags
+from avie_recipe_tag art 
+INNER JOIN avie_tag att ON att.id = art.tag_id   
+WHERE art.recipe_id = ?    
+ ";
 $sqlGetRecipesWithDetails = "SELECT * from avie_recipe ar 
 LEFT OUTER JOIN avie_recipe_tag art ON art.recipe_id = ar.public_id
 LEFT OUTER JOIN avie_tag att ON att.id = art.tag_id

@@ -294,7 +294,6 @@ class form4
 		$fieldSize = 5;
 
 		echo "<div class='form-group align-items-center'>";
-		echo "<br/>";
 		echo "<div class='row'>";
         echo "<label class='control-label col-sm-$labelWidth' for='$name'>";
 
@@ -305,6 +304,10 @@ echo "<select class='form-control col-sm-$fieldSize' id='$name' name='$name'>";
 
 		if ($selected=='')
 			{echo "<option label='' value='' selected></option>";}
+		else
+        {
+            echo "<option label='' value=''></option>";
+        }
 
 		foreach ($values as $value=>$text)
 		{
@@ -639,109 +642,7 @@ echo "<select class='form-control col-sm-$fieldSize' id='$name' name='$name'>";
 		}
 
 	}
-
-
-	/**
-	 * validate_password function.
-	 *
-	 * @access public
-	 * @param mixed $password
-	 * @param string $alpha (default: 'Y')
-	 * @param string $special (default: 'N')
-	 * @return void
-	 */
-	public function validate_password($password, $alpha='Y', $special='N')
-	{
-		$minPassLength = _pdoQuery::get_option(1);
-		$allowPin = _pdoQuery::get_option(7);
-
-		if ($allowPin=='Y')
-		{
-			$minPassLength = 6;
-			$alpha = 'N';
-			$special = 'N';
-
-			//must be numeric
-			if (preg_match('/[^0-9]/', $password)!==false)
-			{
-
-				$message .= "The password for your account must contain only numbers. Please select a new password.<br/>";
-				$this->pwFail = true;
-			}
-			else
-			{
-				$this->pwFail = false;
-
-			}
-
-		}
-
-		$message = '';
-
-		if (strlen($password)<$minPassLength)
-		{
-			$message .= "The password for your account must be at least $minPassLength characters. Please select a new password.<br/>";
-			$this->pwFail = true;
-		}
-
-		else
-		{
-			$this->pwFail = false;
-
-		}
-
-		if ($alpha == 'Y')
-		{
-
-			preg_match('/[0-9]/', $password, $numMatches);//match numbers
-			preg_match('/[a-zA-Z]/', $password, $charMatches);//match letters
-
-			if (count($numMatches)==0)
-			{
-				$message .= "The password for your account must contain at least one number. Please select a new password<br/>";
-				$this->pwFail = true;
-			}
-			else
-			{
-				$this->pwFail = false;
-
-			}
-			if (count($charMatches)==0)
-			{
-				$message .= "The password for your account must contain at least one letter. Please select a new password<br/>";
-				$this->pwFail = true;
-			}
-			else
-			{
-				$this->pwFail = false;
-
-			}
-
-		}
-
-		if ($special == 'Y')
-		{
-
-			preg_match('/[^A-Za-z0-9]/', $password, $specMatches);//special characters
-
-			if (count($specMatches)==0)
-			{
-				$message .= "The password for your account must contain at least one special character. Please select a new password<br/>";
-				$this->pwFail = true;
-			}
-			else
-			{
-				$this->pwFail = false;
-
-			}
-
-		}
-
-		if (strlen($message)>0)
-			{Bootstrap4::error_block($message);}
-
-	}
-
+	
 
 	/**
 	 * close function.
