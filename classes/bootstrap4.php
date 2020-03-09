@@ -548,22 +548,22 @@ class Bootstrap4
             if(strpos($cell, '|')) {
                 $cellDataAr = explode('|', $cell);
                 $cellData = $cellDataAr[0];
-                $cellClass = $cellDataAr[1];
+                $cellColour = $cellDataAr[1];
                 $cellLink = $cellDataAr[2];
-                $toolTip = $cellDataAr[3];
+                $cellClass = $cellDataAr[3];
 
                 $cellReturn = "<td ";
 
-                if($toolTip <> '')
+                if($cellClass <> '')
                 {
-                    $cellReturn .= "title='$toolTip' ";
+                    $cellReturn .= "class='$cellClass' ";
 
 
                 }
 
-                if($cellClass <> '')
+                if($cellColour <> '')
                 {
-                    $cellReturn .= "style='background: $cellClass'";
+                    $cellReturn .= "style='background: $cellColour'";
 
                 }
 
@@ -586,7 +586,7 @@ class Bootstrap4
 
 
             echo $cellReturn;
-            unset($cell, $cellLink, $cellData, $cellClass, $toolTip);
+            unset($cell, $cellLink, $cellData, $cellColour, $cellClass);
         }
 
         echo "</tr>";

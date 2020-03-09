@@ -406,7 +406,7 @@ foreach($recipeList as $key=>$recipeItem)
             $recipeItem['title']
             , $recipeItem['course'], $recipeItem['rating'], $recipeItem['time']
             ,$recipeItem['redct'],$recipeItem['greenct'],$recipeItem['tags']
-            , $recipeItem['photo'], $recipeItem['request']
+            , $recipeItem['photo']."|||d-none d-sm-block", $recipeItem['request']
 
         ],['id'=>$recipeItem['course']]);
 
@@ -417,7 +417,7 @@ foreach($recipeList as $key=>$recipeItem)
             $recipeItem['title']
             , $recipeItem['course'], $recipeItem['rating'], $recipeItem['time']
             ,$recipeItem['redct'],$recipeItem['greenct'],$recipeItem['tags']
-            , $recipeItem['photo'], $recipeItem['request']
+            , $recipeItem['photo']."|||d-none d-sm-block", $recipeItem['request']
 
         ]);
     }
