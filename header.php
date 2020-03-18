@@ -62,7 +62,8 @@ $today = get_date('Y-m-d');
 
 $redline = 5;
 $greenline = 7;
-
+$newCutoff = 30;
+$updatedCutoff = 15;
 
 Bootstrap4::heading($pageTitle,1);
 Bootstrap4::linebreak(2);

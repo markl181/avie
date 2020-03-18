@@ -108,7 +108,7 @@ WHERE afi.food_id = ?
 ORDER BY ar.course, ar.title
 ";
 
-$sqlGetRecipeByPublicId = "SELECT id, updated_at FROM avie_recipe WHERE public_id = ?";
+$sqlGetRecipeByPublicId = "SELECT id, updated_at, title FROM avie_recipe WHERE public_id = ?";
 $sqlGetRecipes = "SELECT * from avie_recipe ORDER BY course, title";
 $sqlGetRecipeCount = "SELECT count(1) AS ct from avie_recipe";
 $sqlGetRecipeCourseCount = "SELECT count(1) AS ct from avie_recipe WHERE course = ?";
@@ -285,8 +285,6 @@ WHERE ai.name LIKE ?
 ORDER BY ar.course, ar.title
 ";
 
-$sqlInsertRecipe = "INSERT INTO avie_recipe (public_id, title, course, main_ingredient, url, website, prep_time
-, cook_time, servings, yield, rating, public_url, photo, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
 $sqlGetRecipeIngredientTime = "SELECT DISTINCT ai.id, ai.name from avie_recipe ar
 INNER JOIN avie_recipe_ingredient ari ON ari.recipe_id = ar.public_id

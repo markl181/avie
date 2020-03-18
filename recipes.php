@@ -71,8 +71,11 @@ foreach($_GET as $key=>$item)
         if(!$pdo->result)
         {
             $pdo->query($sqlInsertRequest, ['binds'=>[$recipeId],'type'=>'insert']);
+            $pdo->query($sqlGetRecipeByPublicId, ['binds'=>[$recipeId], 'fetch'=>'one']);
 
-            Bootstrap4::error_block("Request submitted for recipe $recipeId",'success');
+            $recipeName = $pdo->result['title'];
+
+            Bootstrap4::error_block("Request submitted for recipe $recipeName",'success');
         }
 
 
@@ -152,8 +155,6 @@ else
 }
 
 $recipeList = $pdo->result;
-
-//troubleshoot($recipeList);
 
     $previousId = '';
 
@@ -384,7 +385,25 @@ foreach($recipeList as $key=>$recipeItem)
     $recipeItem['time'] = ($recipeItem['time'] == 0) ? '' : $recipeItem['time'];
     $recipeItem['time'] = convertToHoursMins($recipeItem['time']);
 
+    //highlight title if needed
+    if(datediff($recipeItem['dateadded']) < $newCutoff)
+    {
+        $recipeItem['title'] = "<strong>".$recipeItem['title']." - NEW</strong>";
+
+    }
+    else if(datediff($recipeItem['updated_at']) < $updatedCutoff)
+    {
+
+        $recipeItem['title'] .= " - UPDATED";
+
+    }
+    //format title
     $recipeItem['title'] = $recipeItem['title']."||".$recipeItem['public_url'];
+
+
+
+
+
     $recipeItem['photo'] = "<img height='50px' src='".$recipeItem['photo']."'/>";
     $recipeItem['rating'] = ($recipeItem['rating'] == 0) ? '' : $recipeItem['rating'];
 

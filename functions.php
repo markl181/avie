@@ -106,6 +106,7 @@ function lineargradient($ra, $ga, $ba, $rz, $gz, $bz, $iterationnr, $opacity = 1
 }
 
 
+
 function errors($value=0)
 {
 
@@ -1275,6 +1276,19 @@ function parse_ingredient($ingredient)
 
     return $ingredient;
 
+
+}
+
+function datediff($date)
+{
+
+    $dateObj = new DateTime($date);
+    $today = new DateTime();
+
+    $interval = $dateObj->diff($today);
+    $interval = $interval->format('%a');
+
+    return $interval;
 
 }
 
