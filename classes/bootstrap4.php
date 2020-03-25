@@ -45,7 +45,7 @@ class Bootstrap4
             $centered = '';
         }
 
-        echo "<div class='main container $centered'>";
+        echo "<div class='main container-fluid $centered'>";
 
 
     }
@@ -858,7 +858,7 @@ class Bootstrap4
 
             if($link != $current) {
 
-                $output .= "<a href='$link' target='_blank'>$name</a>";
+                $output .= "<a href='$link'>$name</a>";
                 $output .= " | ";
             }
 

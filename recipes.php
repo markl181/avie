@@ -314,7 +314,7 @@ $form->select('tag','Tag: ',$tagSelect, $tag);
     ,'Sides'=>'Sides','Soup'=>'Soup'], $course);*/
 $form->input('redlimit','Max Red:',['type'=>'number','min'=>0,'max'=>10, 'value'=>$redLimit]);
 $form->input('greenlimit','Min Green:',['type'=>'number','min'=>0,'max'=>10, 'value'=>$greenLimit]);
-
+//$form->checkbox('compact','Compact View');
 
 
 Bootstrap4::error_block('Check a box to request a recipe','info');

@@ -271,6 +271,12 @@ WHERE ifnull(blackct,0) = 0  ORDER BY course, title
 $sqlInsertRecipe = "INSERT INTO avie_recipe (public_id, title, course, main_ingredient, url, website, prep_time
 , cook_time, servings, yield, rating, public_url, photo, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
 
+$sqlUpdateRecipe = "UPDATE avie_recipe SET title=?, course=?, main_ingredient=?, url=?, website=?, prep_time=?
+, cook_time=?, servings=?, yield=?, rating=?, public_url=?, photo=?, updated_at=?
+WHERE public_id = ?
+";
+
+
 $sqlGetRecipeIngredient = "SELECT DISTINCT ai.id, ai.name from avie_recipe ar
 INNER JOIN avie_recipe_ingredient ari ON ari.recipe_id = ar.public_id
 INNER JOIN avie_ingredient ai ON ai.id = ari.ingredient_id
