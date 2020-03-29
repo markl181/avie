@@ -367,13 +367,85 @@ LEFT OUTER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_i
 LEFT OUTER JOIN avie_food af ON af.id = afi.food_id
 LEFT OUTER JOIN avie_level al ON al.id = af.level_id
 WHERE al.name = 'Green'
-AND isdeleted = 0
 GROUP BY recipe_id
 ) greenj ON greenj.recipe_id = ar.public_id 
-
+AND isdeleted = 0
 WHERE active = 1";
 
 $sqlUpdateRequestDate = "UPDATE avie_recipe_request SET date = ? WHERE id = ?";
 $sqlUpdateRequestStatus = "UPDATE avie_recipe_request SET active = 0 WHERE id = ?";
+
+
+/*Pantry*/
+
+$sqlInsertIngredient = "INSERT INTO ingredients (name) VALUES (?)";
+$sqlSelectIngredient = "SELECT id, name FROM ingredients ORDER BY name";
+$sqlSelectSeason = "SELECT id, name FROM season ORDER BY month";
+$sqlIngredientReport = "SELECT i.id, i.name FROM ingredients i ORDER BY i.name";
+$sqlSeasonReport = "SELECT i.id, i.name, s1.name start, s2.name end FROM ingredients i 
+INNER JOIN ingredient_season iis ON iis.ingredient_id = i.id
+LEFT OUTER JOIN season s1 ON s1.id = iis.season_start_id
+LEFT OUTER JOIN season s2 ON s2.id = iis.season_end_id
+ORDER BY i.name";
+$sqlGetIngredientById = "SELECT i.id, i.name FROM ingredients i WHERE i.id = ?";
+$sqlGetIngredientByName = "SELECT i.id, i.name FROM ingredients i WHERE lower(i.name) = lower(?)";
+$sqlCheckPairing = "SELECT id FROM ingredient_pair WHERE ingredient_id = ? AND ingredient_id2 = ?";
+$sqlCheckSubstitutes = "SELECT id FROM ingredient_substitute WHERE ingredient_id = ? AND ingredient_id2 = ?";
+$sqlInsertPairing = "INSERT INTO ingredient_pair (ingredient_id, ingredient_id2) VALUES (?,?)";
+$sqlInsertSubstitute = "INSERT INTO ingredient_substitute (ingredient_id, ingredient_id2) VALUES (?,?)";
+$sqlGetPairingById = "SELECT 
+GROUP_CONCAT(DISTINCT il.name ORDER BY il.name ASC SEPARATOR ', ') pairings
+FROM
+(
+SELECT
+i.name
+FROM ingredient_pair ip
+INNER JOIN ingredients i ON i.id = ip.ingredient_id2
+WHERE ingredient_id = ?
+UNION
+SELECT
+i.name
+FROM ingredient_pair ip
+INNER JOIN ingredients i ON i.id = ip.ingredient_id
+WHERE ingredient_id2 = ?) il";
+$sqlGetSubstituteById = "SELECT 
+GROUP_CONCAT(DISTINCT il.name ORDER BY il.name ASC SEPARATOR ', ') substitutes
+FROM
+(
+SELECT
+i.name
+FROM ingredient_substitute ip
+INNER JOIN ingredients i ON i.id = ip.ingredient_id2
+WHERE ingredient_id = ?
+UNION
+SELECT
+i.name
+FROM ingredient_substitute ip
+INNER JOIN ingredients i ON i.id = ip.ingredient_id
+WHERE ingredient_id2 = ?) il";
+
+$sqlInsertSeason = "INSERT INTO ingredient_season (ingredient_id, season_start_id, season_end_id) 
+            VALUES (?,?,?)";
+
+$sqlCheckSeasons = "SELECT id, season_start_id, season_end_id FROM ingredient_season WHERE ingredient_id = ?";
+
+$sqlGetAllSeasons = "SELECT i.id, i.name, s1.month month1, s2.month month2 FROM ingredient_season iis
+INNER JOIN ingredients i ON i.id = iis.ingredient_id
+LEFT OUTER JOIN season s1 ON s1.id = iis.season_start_id
+LEFT OUTER JOIN season s2 ON s2.id = iis.season_end_id
+ORDER BY i.name
+";
+
+
+
+$sqlGetJars = "SELECT id, name FROM jar ORDER BY name";
+$sqlGetSpices = "SELECT spice.name spice, jar.name container, spice_jar.percentage amount, spice_jar.size FROM spice 
+left outer join spice_jar on spice.id = spice_jar.spice_id
+left outer join jar on jar.id = spice_jar.jar_id
+ORDER BY spice.name";
+$sqlInsertSpice = "INSERT INTO spice (name) VALUES (?)";
+$sqlInsertJar = "INSERT INTO jar (name) VALUES (?)";
+$sqlGetSpiceJar = "SELECT id FROM spice_jar WHERE spice_id = ? AND jar_id = ?";
+$sqlInsertSpiceJar = "INSERT INTO spice_jar (spice_id, jar_id, percentage, size) VALUES (?,?,?,?)";
 
 ?>

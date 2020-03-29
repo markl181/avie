@@ -359,6 +359,83 @@ class simple_pdo
 
  }
 
+	/**
+	 * @param        $name
+	 * @param        $label
+	 * @param        $value
+	 * @param        $query
+	 * @param int    $column
+	 * @param int    $labelWidth
+	 * @param int    $fieldSize
+	 * @param string $comment
+	 * @param string $autofocus
+	 * @param string $required
+	 */
+	public function datalist($name, $label, $value, $query, $column=1, $labelWidth=4, $fieldSize=5
+		, $comment='', $autofocus='', $required='')
+
+	{
+		//get global size from bootstrap
+		$size = Bootstrap4::$size;
+
+		if ($autofocus<>'')
+			$autofocus = ' autofocus';
+		else
+			$autofocus = '';
+
+		if ($value<>'')
+			$formValue = "value = '$value'";
+		else
+			$formValue = '';
+
+		if ($required<>'')
+			$required = ' required';
+		else
+			$required = '';
+
+		$this->query($query);
+		$result = $this->result;
+
+		echo "<div class='form-group align-items-center'>";
+		echo "<div class='row'>";
+		echo "<label for='$name' class='col-$size-$labelWidth control-label'>$label </label>";
+		echo "<datalist id='$name'>";
+		echo "<select name='$name'>";
+		foreach ($result as $row)
+		{
+			$optionValue = $row[$column];
+			$optionId = $row['id'];
+			if ($optionValue == $value)
+			{
+				//echo "<option selected='selected'>$optionValue</option>";
+				echo "<option>$optionValue</option>";
+			}
+			else
+			{
+				echo "<option>$optionValue</option>";
+			}
+			//echo "<option>$optionValue</option>";
+
+		}
+		Bootstrap4::tag_close('select');
+		Bootstrap4::tag_close('datalist');
+		echo "<div class='col-$size-$fieldSize'>";
+		echo "<input class='form-control' list='$name' id='$name' name='$name' type='text' $formValue $required $autofocus/>";
+		Bootstrap4::tag_close('div');
+
+
+		if ($comment<>'')
+		{
+			echo "<div class='col-$size-$fieldSize col-$size-offset-$labelWidth'>";
+			echo "<p class='help-block'>$comment</p></div>";
+		}
+
+		//close form group
+		Bootstrap4::tag_close('div',2);
+
+
+	}
+
 
 
 

@@ -1292,5 +1292,74 @@ function datediff($date)
 
 }
 
+class MyDateTime extends DateTime
+{
+
+    public function addMonth($num = 1)
+    {
+        $date = $this->format('Y-n-j');
+        list($y, $m, $d) = explode('-', $date);
+
+        $m += $num;
+        while ($m > 12)
+        {
+            $m -= 12;
+            $y++;
+        }
+
+        $last_day = date('t', strtotime("$y-$m-1"));
+        if ($d > $last_day)
+        {
+            $d = $last_day;
+        }
+
+        $this->setDate($y, $m, $d);
+    }
+
+}
+
+function check_month($thisMonth, $month1, $month2)
+{
+
+    if($thisMonth >= $month1 && $thisMonth <= $month2) {
+//regular order 1-12
+        //echo "Regular " . $seasonDatum['name'] . "<br/>";
+
+        return true;
+
+    }
+    else if ($thisMonth >= $month1 && $month2 < $month1)
+    {
+        //irregular order
+        //echo "Unregular " . $seasonDatum['name'] . "<br/>";
+
+        return true;
+
+    }
+    else if($thisMonth < $month1 && $month2 < $month1
+        && $thisMonth <= $month2)
+    {
+        //echo "other side " . $seasonDatum['name'] . "<br/>";
+
+        return true;
+
+    }
+    else
+    {
+        return false;
+
+    }
+
+}
+
+function sizesort($a, $b) {
+
+    if ($a['total'] == $b['total']) {
+        return 0;
+    }
+    return ($a['total'] < $b['total']) ? -1 : 1;
+
+
+}
 
 ?>

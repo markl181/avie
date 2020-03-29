@@ -350,7 +350,9 @@ Bootstrap4::linebreak(2);
 
 
 
-Bootstrap4::table(['Title','Course','Rating','Time (m)','Red','Green','Tags','Photo','']);
+Bootstrap4::table(['Title','Course','Rating'
+    //,'Time (m)'
+    ,'Red','Green','Tags','Photo','']);
 
 /*
  * Add in course jumps
@@ -423,7 +425,8 @@ foreach($recipeList as $key=>$recipeItem)
     {
         Bootstrap4::table_row([
             $recipeItem['title']
-            , $recipeItem['course'], $recipeItem['rating'], $recipeItem['time']
+            , $recipeItem['course'], $recipeItem['rating']
+            //, $recipeItem['time']
             ,$recipeItem['redct'],$recipeItem['greenct'],$recipeItem['tags']
             , $recipeItem['photo']."|||d-none d-sm-block", $recipeItem['request']
 
@@ -434,7 +437,8 @@ foreach($recipeList as $key=>$recipeItem)
     {
         Bootstrap4::table_row([
             $recipeItem['title']
-            , $recipeItem['course'], $recipeItem['rating'], $recipeItem['time']
+            , $recipeItem['course'], $recipeItem['rating']
+            //, $recipeItem['time']
             ,$recipeItem['redct'],$recipeItem['greenct'],$recipeItem['tags']
             , $recipeItem['photo']."|||d-none d-sm-block", $recipeItem['request']
 
