@@ -439,7 +439,7 @@ ORDER BY i.name
 
 
 $sqlGetJars = "SELECT id, name FROM jar ORDER BY name";
-$sqlGetSpices = "SELECT spice.name spice, jar.name container, spice_jar.percentage amount, spice_jar.size FROM spice 
+$sqlGetSpices = "SELECT spice.id, spice.name spice, jar.name container, spice_jar.percentage amount, spice_jar.size FROM spice 
 left outer join spice_jar on spice.id = spice_jar.spice_id
 left outer join jar on jar.id = spice_jar.jar_id
 ORDER BY spice.name";

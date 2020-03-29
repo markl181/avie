@@ -11,6 +11,8 @@ $greenSpan = 'rgba(0, 255, 0, 0.6)';
 $redSpan = 'rgba(255, 0, 0, 0.6)';
 $yellowSpan = 'rgba(255, 255, 0, 0.6)';
 $blackSpan = 'rgba(20,20,20,0.9)';
+$highlight = 'rgba(0, 255, 0, 0.6)';
+$highlightRed = 'rgba(255, 0, 0, 0.6)';
 
 //white to green
 $colorindexgreen = lineargradient(

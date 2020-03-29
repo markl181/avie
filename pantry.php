@@ -78,7 +78,7 @@ $form->submit();
 $form->close();
 
 Bootstrap4::linebreak(2);
-Bootstrap4::table(['Spice','Container','Size','% Full','Total Amount']);
+Bootstrap4::table(['Spice','Container','Size','% Full','Total Amount','Updated']);
 
 $pdo->query($sqlGetSpices, ['fetch'=>'all']);
 $spicesList = $pdo->result;
@@ -108,14 +108,23 @@ usort($spicesList, "sizesort");
 foreach($spicesList as $spiceRow)
 {
 
+
     if($spiceRow['amount'] < $cutoff)
     {
         $spiceRow['amount'] = $spiceRow['amount']."|".$highlightRed;
     }
 
-    Bootstrap4::table_row([$spiceRow['spice'],$spiceRow['container'],$spiceRow['size'],$spiceRow['amount']
-      ,$spiceRow['total']]);
+    //get last update
+    $sqlGetLastPantryUpdate = "SELECT MAX(timestamp) as ts FROM spice_jar WHERE spice_id = ? ";
+    $pdo->query($sqlGetLastPantryUpdate, ['binds'=>[$spiceRow['id']],'fetch'=>'one']);
+    $update = $pdo->result['ts'];
+    $update = get_date('Y-m-d',$update);
 
+
+    Bootstrap4::table_row([$spiceRow['spice'],$spiceRow['container'],$spiceRow['size'],$spiceRow['amount']
+      ,$spiceRow['total'],$update]);
+
+    unset($update);
 
 }
 
@@ -123,6 +132,8 @@ foreach($spicesList as $spiceRow)
 
 Bootstrap4::table_close();
 
+
+echo date_default_timezone_get();
 
 include 'footer.php';
 
