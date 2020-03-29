@@ -48,7 +48,7 @@ LEFT OUTER JOIN avie_food af ON af.level_id = al.id
 GROUP BY al.id, al.name
  ORDER BY id";
 
-$sqlGetCourses = "SELECT DISTINCT course FROM avie_recipe ORDER BY 1";
+$sqlGetCourses = "SELECT DISTINCT course FROM avie_recipe WHERE isdeleted = 0 ORDER BY 1";
 
 $sqlInsertFood = "INSERT INTO avie_food (name, level_id) VALUES (?, ?)";
 $sqlInsertTag = "INSERT INTO avie_tag (name) VALUES (?)";
@@ -105,13 +105,14 @@ WHERE al.name = 'Green'
 GROUP BY recipe_id
 ) greenj ON greenj.recipe_id = ar.public_id 
 WHERE afi.food_id = ?
+AND isdeleted = 0
 ORDER BY ar.course, ar.title
 ";
 
-$sqlGetRecipeByPublicId = "SELECT id, updated_at, title FROM avie_recipe WHERE public_id = ?";
-$sqlGetRecipes = "SELECT * from avie_recipe ORDER BY course, title";
+$sqlGetRecipeByPublicId = "SELECT id, updated_at, title FROM avie_recipe WHERE public_id = ? AND isdeleted = 0";
+$sqlGetRecipes = "SELECT * from avie_recipe ORDER BY course, title WHERE isdeleted = 0";
 $sqlGetRecipeCount = "SELECT count(1) AS ct from avie_recipe";
-$sqlGetRecipeCourseCount = "SELECT count(1) AS ct from avie_recipe WHERE course = ?";
+$sqlGetRecipeCourseCount = "SELECT count(1) AS ct from avie_recipe WHERE course = ? AND isdeleted = 0";
 $sqlGetRecipeTags = "SELECT 
  GROUP_CONCAT(att.name) tags
 from avie_recipe_tag art 
@@ -125,6 +126,7 @@ LEFT OUTER JOIN avie_recipe_ingredient ari ON ari.recipe_id = ar.public_id
 LEFT OUTER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
 LEFT OUTER JOIN avie_food af ON af.id = afi.food_id
 LEFT OUTER JOIN avie_level al ON al.id = af.level_id
+WHERE isdeleted = 0
 ORDER BY course, title";
 
 $sqlGetRecipesByInclude = "
@@ -173,9 +175,11 @@ LEFT OUTER JOIN avie_level al ON al.id = af.level_id
 WHERE al.name = 'Green'
 GROUP BY recipe_id
 ) greenj ON greenj.recipe_id = ar.public_id 
-WHERE 1=1";
+WHERE 1=1
+AND isdeleted = 0
+";
 
-$sqlGetRecipesWithRating = "
+$sqlGetRecipesDefault = "
 SELECT DISTINCT ar.*
 , ifnull(blackct,0) blackct
 , ifnull(redct,0) redct
@@ -218,9 +222,18 @@ LEFT OUTER JOIN avie_level al ON al.id = af.level_id
 WHERE al.name = 'Green'
 GROUP BY recipe_id
 ) greenj ON greenj.recipe_id = ar.public_id 
-WHERE rating = 5 ORDER BY rating DESC, course, title
+WHERE 
+(rating = 5 OR rating = 0 OR att.name = 'Avie-Approved') 
+  AND
+(course = '' OR course = 'Desserts and Treats' OR course = 'Main Course')    
+AND isdeleted = 0
+ORDER BY RAND(),
+rating DESC, course, title
 LIMIT 100
 ";
+
+$sqlGetActiveRecipes = "SELECT id, public_id FROM avie_recipe WHERE isdeleted = 0";
+$sqlInactivateRecipe = "UPDATE avie_recipe SET isdeleted = 1 WHERE id = ?";
 
 $sqlGetAllRecipes = "
 SELECT DISTINCT ar.*
@@ -265,7 +278,9 @@ LEFT OUTER JOIN avie_level al ON al.id = af.level_id
 WHERE al.name = 'Green'
 GROUP BY recipe_id
 ) greenj ON greenj.recipe_id = ar.public_id 
-WHERE ifnull(blackct,0) = 0  ORDER BY course, title
+WHERE ifnull(blackct,0) = 0  
+AND isdeleted = 0
+ORDER BY course, title
 ";
 
 $sqlInsertRecipe = "INSERT INTO avie_recipe (public_id, title, course, main_ingredient, url, website, prep_time
@@ -352,6 +367,7 @@ LEFT OUTER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_i
 LEFT OUTER JOIN avie_food af ON af.id = afi.food_id
 LEFT OUTER JOIN avie_level al ON al.id = af.level_id
 WHERE al.name = 'Green'
+AND isdeleted = 0
 GROUP BY recipe_id
 ) greenj ON greenj.recipe_id = ar.public_id 
 

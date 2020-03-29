@@ -30,7 +30,7 @@ $rating = $_GET['rating'];
 $keyword = $_GET['keyword'];
 $tag = $_GET['tag'];
 
-$approvedTags = ['Avie-Approved','Freezable'];
+$approvedTags = ['Avie-Approved','Freezable','Candida diet','Slow Cooker'];
 
 
 foreach($approvedTags as $approvedTag)
@@ -149,7 +149,7 @@ else
 {
     //default form if nothing is set
 
-    $pdo->query($sqlGetRecipesWithRating);
+    $pdo->query($sqlGetRecipesDefault);
 
     $filters[] = 1;
 }
@@ -266,7 +266,7 @@ $recipeCount = count($recipeList);
             {
                 if($filter == 1)
                 {
-                    $text.= 'only top rated recipes';
+                    $text.= 'random selection of desserts/mains';
 
                 }
                 if($filter == 2)
