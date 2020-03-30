@@ -353,6 +353,7 @@ echo "<select class='form-control col-sm-$fieldSize' id='$name' name='$name'>";
 
         $valuesArray = [];
 
+
         echo "<div class='form-group align-items-center'>";
         echo "<div class='row'>";
         echo "<br/>";
@@ -377,7 +378,7 @@ echo "<select class='form-control col-sm-$fieldSize' id='$name' name='$name'>";
             echo "<option label='' value='' selected></option>";
         }
 
-        if($queryField != '') {
+                if($queryField != '') {
             //key will be field name
 
             foreach($values as $item) {
@@ -398,6 +399,7 @@ echo "<select class='form-control col-sm-$fieldSize' id='$name' name='$name'>";
         foreach($valuesArray as $value => $text) {
             if($value == $selected) {
                 echo "<option selected='selected' value='$value'>$text</option>";
+
             } else {
                 echo "<option value='$value'>$text</option>";
             }
