@@ -128,7 +128,7 @@ $form->hidden('spicejar_id', $id);
 
 
 Bootstrap4::linebreak(2);
-Bootstrap4::table(['Spice','Container','Size (g)','% Full','Total Amount (g)','Updated']);
+Bootstrap4::table(['Item','Container','Size (g)','% Full','Total Amount (g)','Updated']);
 
 $rowClass = 'clickable-row';
 
@@ -158,7 +158,6 @@ foreach($spicesList as $key=>&$spiceRow)
     }
 
 
-//troubleshoot($spicesList);
 
 //usort($spicesList, "sizesort");
 
