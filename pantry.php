@@ -25,17 +25,39 @@ $cutoff = 30;
 if(isset($_POST['submit']))
 {
 
-    //$date = preg_replace("([^0-9-])", "", $_POST['date']);
+    //troubleshoot($_POST);
+
     $spice = filter_var($_POST['spice'], FILTER_SANITIZE_STRING);
     $spice = ucwords($spice);
     $container = filter_var($_POST['jar'], FILTER_SANITIZE_NUMBER_INT
     );
+    $category = filter_var($_POST['category'], FILTER_SANITIZE_STRING);
     $amount = filter_var($_POST['amount'], FILTER_SANITIZE_NUMBER_INT
     );
     $size = filter_var($_POST['size'], FILTER_SANITIZE_NUMBER_INT
     );
     $formId = filter_var($_POST['spicejar_id'], FILTER_SANITIZE_NUMBER_INT
     );
+    $quantity = filter_var($_POST['quantity'], FILTER_SANITIZE_NUMBER_INT);
+
+
+    if($category)
+    {
+
+        //check if category exists
+        $pdo->idColumn = 'id';
+        $pdo->searchColumn = 'name';
+        $pdo->searchTable = 'category';
+        $pdo->searchValue = $category;
+        $pdo->insertQuery = $sqlInsertCategory;
+        $pdo->insertBinds = [$category];
+
+        $pdo->find_id();
+        $categoryId = $pdo->recordId;
+
+        //troubleshoot($categoryId);
+
+    }
 
     if(!$formId)
     {
@@ -49,15 +71,15 @@ if(isset($_POST['submit']))
         $pdo->insertBinds = [$spice];
 
         $pdo->find_id();
-        $spiceId = $pdo->recordId;
+        $itemId = $pdo->recordId;
 
         //check if the spice jar exists and insert it if not
-        $pdo->query($sqlGetSpiceJar, ['binds'=>[$spiceId, $container], 'fetch'=>'one']);
+        $pdo->query($sqlGetSpiceJar, ['binds'=>[$itemId, $container], 'fetch'=>'one']);
         $spiceJar = $pdo->result;
 
         if(!$spiceJar)
         {
-            $pdo->query($sqlInsertSpiceJar, ['binds'=>[$spiceId, $container, $amount, $size]
+            $pdo->query($sqlInsertSpiceJar, ['binds'=>[$itemId, $container, $categoryId, $amount, $size, $quantity]
                 , 'type'=>'insert']);
 
         }
@@ -67,20 +89,26 @@ if(isset($_POST['submit']))
     {
         //update existing record
 
-
         $pdo->query($sqlGetSpiceJarById, ['binds'=>[$formId],'fetch'=>'one']);
         $dbRow = $pdo->result;
 
         $dbSpice = $dbRow['spice'];
-        $dbcontainer = $dbRow['container'];
+        $dbContainer = $dbRow['container'];
+        $dbCategory = $dbRow['category_id'];
         $dbAmount = $dbRow['amount'];
         $dbSize = $dbRow['size'];
+        $dbQuantity = $dbRow['quantity'];
 
-        if($dbAmount <> $amount || $dbSize <> $size)
+        if($dbAmount <> $amount || $dbSize <> $size || $dbSpice <> $spice || $categoryId <> $dbCategory
+            || $dbQuantity <> $quantity)
         {
-            $sqlUpdateSpiceJar = "UPDATE spice_jar SET size=?, percentage=? WHERE id = ?";
 
-            $pdo->query($sqlUpdateSpiceJar, ['binds'=>[$size, $amount,$formId], 'type'=>'update']);
+            
+            $sqlUpdateSpiceJar = "UPDATE spice_jar SET size=?, percentage=?, category_id=?, quantity=? WHERE id = ?";
+
+            $pdo->query($sqlUpdateSpiceJar, ['binds'=>[$size, $amount,$categoryId, $quantity, $formId], 'type'=>'update']);
+
+            //@@todo update name if needed
 
         }
 
@@ -104,9 +132,11 @@ if(isset($_GET['id'])) {
 
     $dbSpice = $dbRow['spice'];
     $container = $dbRow['container'];
+    $dbCategory = $dbRow['category_id'];
     $dbAmount = $dbRow['amount'];
     $dbSize = $dbRow['size'];
-
+    $category = $dbRow['category'];
+    $dbQuantity = $dbRow['quantity'];
 
 
 }
@@ -114,21 +144,36 @@ if(isset($_GET['id'])) {
 $pdo->query($sqlGetJars, ['fetch'=>'all']);
 $jarsList = $pdo->result;
 
-$form->open();
-$form->input('spice','Spice:',['type'=>'text','required'=>'required','autofocus'=>'autofocus'
-    ,'value'=>$dbSpice]);
-//$form->input('container','Container:',['type'=>'text','required'=>'required','autofocus'=>'autofocus']);
+$pdo->query($sqlGetCategories, ['fetch'=>'all']);
+$catsList = $pdo->result;
 
+//set default form values
+if($dbAmount == '')
+{
+    $dbAmount = 100;
+}
+if($dbQuantity == '' || $dbQuantity == 0)
+{
+    $dbQuantity = 1;
+
+}
+
+$form->open();
+$form->input('spice','Item:',['type'=>'text','required'=>'required','autofocus'=>'autofocus'
+    ,'value'=>$dbSpice,'autocomplete'=>'autocomplete']);
+//$form->input('container','Container:',['type'=>'text','required'=>'required','autofocus'=>'autofocus']);
+$form->datalist_query('category','Category:',$catsList, 'name','id',$category);
 $form->selectquery('jar','Container:',$jarsList, 'name','id', $container);
-$form->input('size','Size:',['type'=>'number','required'=>'required','autofocus'=>'autofocus'
-,'value'=>$dbSize]);
+$form->input('size','Size:',['type'=>'number','required'=>'required','min'=>0,'value'=>$dbSize]);
+$form->input('quantity','Quantity:',['type'=>'number','min'=>0,'required'=>'required'
+    ,'value'=>$dbQuantity]);
 //$form->datalistquery('jar2','C2',$jarsList, 'name','id',$jar);
 $form->input('amount','% Full:',['type'=>'number','min'=>0,'max'=>100,'value'=>$dbAmount]);
 $form->hidden('spicejar_id', $id);
 
 
 Bootstrap4::linebreak(2);
-Bootstrap4::table(['Item','Container','Size (g)','% Full','Total Amount (g)','Updated']);
+Bootstrap4::table(['Item','Category','Container','Qty','Size (g)','% Full','Total Amount (g)','Updated']);
 
 $rowClass = 'clickable-row';
 
@@ -143,7 +188,9 @@ $spiceKey = '';
 foreach($spicesList as $key=>&$spiceRow)
     {
 
-        $spiceRow['total'] = round($spiceRow['size'] * ($spiceRow['amount']/100));
+        //troubleshoot($spiceRow);
+
+        $spiceRow['total'] = round($spiceRow['size'] * ($spiceRow['amount']/100) * $spiceRow['quantity']);
 
         if($spiceRow['spice'] == $spiceName)
         {
@@ -177,7 +224,8 @@ foreach($spicesList as $spiceRowItem)
     $update = $pdo->result['ts'];
     $update = get_date('Y-m-d',$update);
 
-    Bootstrap4::table_row([$spiceRowItem['spice'],$spiceRowItem['container'],$spiceRowItem['size']
+    Bootstrap4::table_row([$spiceRowItem['spice'],$spiceRowItem['category'],$spiceRowItem['container']
+        ,$spiceRowItem['quantity'],$spiceRowItem['size']
         ,$spiceRowItem['amount']
       ,$spiceRowItem['total'],$update], ['class' => $rowClass, 'data-href' => $url]);
 
@@ -189,6 +237,7 @@ foreach($spicesList as $spiceRowItem)
 Bootstrap4::table_close();
 
 $form->submit();
+echo "<a role='button' href='pantry.php' class='btn btn-primary' name='clear'>Clear</a>";
 $form->close();
 
 include 'footer.php';

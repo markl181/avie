@@ -439,19 +439,26 @@ ORDER BY i.name
 
 
 $sqlGetJars = "SELECT id, name FROM jar ORDER BY name";
-$sqlGetSpices = "SELECT spice.id, spice_jar.id record_id, spice.name spice, jar.name container, spice_jar.percentage amount, spice_jar.size FROM spice 
+$sqlGetCategories = "SELECT id, name FROM category ORDER BY name";
+$sqlGetSpices = "SELECT spice.id, spice_jar.id record_id, spice.name spice, jar.name container
+     , spice_jar.percentage amount, spice_jar.size, ct.name category, quantity
+FROM spice 
 left outer join spice_jar on spice.id = spice_jar.spice_id
 left outer join jar on jar.id = spice_jar.jar_id
-ORDER BY spice.name";
+left outer join category ct on ct.id = spice_jar.category_id
+ORDER BY ct.name, spice.name";
 $sqlInsertSpice = "INSERT INTO spice (name) VALUES (?)";
+$sqlInsertCategory = "INSERT INTO category (name) VALUES (?)";
 $sqlInsertJar = "INSERT INTO jar (name) VALUES (?)";
 $sqlGetSpiceJar = "SELECT id FROM spice_jar WHERE spice_id = ? AND jar_id = ?";
-$sqlInsertSpiceJar = "INSERT INTO spice_jar (spice_id, jar_id, percentage, size) VALUES (?,?,?,?)";
+$sqlInsertSpiceJar = "INSERT INTO spice_jar (spice_id, jar_id, category_id, percentage, size, quantity) 
+VALUES (?,?,?,?,?,?)";
 $sqlGetLastPantryUpdate = "SELECT MAX(timestamp) as ts FROM spice_jar WHERE spice_id = ? ";
 $sqlGetSpiceJarById = "SELECT spice.id, spice_jar.id record_id, spice.name spice, jar.id container
-     , spice_jar.percentage amount, spice_jar.size FROM spice 
+     , spice_jar.percentage amount, spice_jar.size, category_id, ct.name category, quantity FROM spice 
 LEFT OUTER JOIN spice_jar ON spice.id = spice_jar.spice_id
 LEFT OUTER JOIN jar ON jar.id = spice_jar.jar_id
+left outer join category ct on ct.id = spice_jar.category_id
 WHERE spice_jar.id = ?";
 $sqlUpdateSpiceJar = "UPDATE spice_jar SET size=?, percentage=? WHERE id = ?";
 

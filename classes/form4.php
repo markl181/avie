@@ -418,6 +418,75 @@ echo "<select class='form-control col-sm-$fieldSize' id='$name' name='$name'>";
 
     }
 
+    /**
+     * @param     $name
+     * @param     $label
+     * @param     $preset
+     * @param     $values
+     * @param int $labelWidth
+     * @param int $fieldSize
+     */
+    public function datalist_query($name, $label, $values, $queryField = '', $idField = '', $selected = ''
+        , $attributesArray = '')
+    {
+        $labelWidth = 4;
+        $fieldSize = 5;
+        $this->class = 'form-control';
+
+        $valuesArray = [];
+
+        echo "<div class='form-group align-items-center'>";
+        echo "<div class='row'>";
+        echo "<label for='$name' class='col-sm-$labelWidth control-label'>$label </label>";
+        echo "<datalist id='$name'>";
+        echo "<select name='$name'>";
+
+        if($attributesArray <> '')
+        {
+            $this->attributesArray = $attributesArray;
+            $this->attributes();
+
+        }
+
+        echo " class = '$this->class'";
+
+
+        if($queryField != '') {
+            //key will be field name
+
+            foreach($values as $item) {
+                //reformat array into usable format
+                $valuesArray[$item[$idField]] = $item[$queryField];
+
+
+            }
+
+        } else {
+
+            $valuesArray = $values;
+
+        }
+
+        foreach($valuesArray as $value => $text) {
+
+                echo "<option value='$text'>$text</option>";
+
+
+        }
+
+        Bootstrap4::tag_close('select');
+        Bootstrap4::tag_close('datalist');
+        //echo "<div class='col-sm-$fieldSize'>";
+        echo "<input class='form-control col-sm-$fieldSize' value='$selected' list='$name' id='$name' name='$name' type='text'/>";
+        //Bootstrap4::tag_close('div');
+        Bootstrap4::tag_close('div');
+        //close form group
+        Bootstrap4::tag_close('div');
+
+
+    }
+
+
 
 
     /**
