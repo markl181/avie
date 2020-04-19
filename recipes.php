@@ -244,6 +244,7 @@ $recipeList = $pdo->result;
     }
 
 $recipeList = array_filter($recipeList);
+    $recipeCourseList = $recipeList;
 $recipeCount = count($recipeList);
 
 
@@ -323,13 +324,15 @@ Bootstrap4::error_block('Check a box to request a recipe','info');
 
 $courseCountAr = array();
 
-foreach($recipeList as $recipe) {
+foreach($recipeCourseList as $recipeCourse) {
 
-    $courseCountAr[$recipe['course']]++;
+    $courseCountAr[$recipeCourse['course']]++;
 
 }
 
 $courseArray = array_flatten($recipeList,'course');
+
+
 
 //generate a flat set of buttons here
 foreach($courseArray as $courseBt)
@@ -369,6 +372,13 @@ where name in ($inClause)
 
 $previousCourse = '';
 
+$pdo->query($sqlGetRecentlyPlanned, ['binds'=>[$requestCutoff], 'fetch'=>'all']);
+$recentRequests = $pdo->result;
+
+$recentRequests = array_flatten($recentRequests, 'recipe_id');
+
+//troubleshoot($recentRequests);
+
 foreach($recipeList as $key=>$recipeItem)
 {
 
@@ -399,11 +409,14 @@ foreach($recipeList as $key=>$recipeItem)
         $recipeItem['title'] .= " - UPDATED";
 
     }
+    if(in_array($recipeItem['public_id'], $recentRequests))
+    {
+
+        $recipeItem['title'] .= " - RECENTLY PLANNED";
+
+    }
     //format title
     $recipeItem['title'] = $recipeItem['title']."||".$recipeItem['public_url'];
-
-
-
 
 
     $recipeItem['photo'] = "<img height='50px' src='".$recipeItem['photo']."'/>";

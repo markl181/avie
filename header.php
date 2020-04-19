@@ -64,6 +64,7 @@ $redline = 5;
 $greenline = 7;
 $newCutoff = 30;
 $updatedCutoff = 15;
+$requestCutoff = 30;
 
 Bootstrap4::heading($pageTitle,1);
 Bootstrap4::linebreak(2);

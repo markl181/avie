@@ -26,7 +26,7 @@ if(isset($_POST['submit']))
             $pdo->query($sqlUpdateRequestStatus, ['binds'=>[$recordId], 'type'=>'update']);
 
         }
-        if(strpos($key,'date_') == 0 && isset($value))
+        else if(strpos($key,'date_') == 0 && isset($value))
         {
             $recordId = str_ireplace('date_','',$key);
             $recordId = filter_var($recordId, FILTER_SANITIZE_NUMBER_INT);

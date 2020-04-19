@@ -340,6 +340,10 @@ $sqlFinishOneInclude = " AND
 afi.food_id = ?
 ORDER BY ar.course, ar.title";
 
+$sqlGetRecentlyPlanned = "SELECT recipe_id FROM avie_recipe_request
+WHERE datediff(now(),DATE) < ?";
+
+
 $sqlInsertUpdate = "INSERT INTO avie_update (type) VALUES (?)";
 
 $sqlGetRequests = "SELECT arr.id, arr.active, arr.date, ar.title, ar.course 
@@ -446,6 +450,7 @@ FROM spice
 left outer join spice_jar on spice.id = spice_jar.spice_id
 left outer join jar on jar.id = spice_jar.jar_id
 left outer join category ct on ct.id = spice_jar.category_id
+WHERE 1=1
 ORDER BY ct.name, spice.name";
 $sqlInsertSpice = "INSERT INTO spice (name) VALUES (?)";
 $sqlInsertCategory = "INSERT INTO category (name) VALUES (?)";
@@ -460,7 +465,8 @@ LEFT OUTER JOIN spice_jar ON spice.id = spice_jar.spice_id
 LEFT OUTER JOIN jar ON jar.id = spice_jar.jar_id
 left outer join category ct on ct.id = spice_jar.category_id
 WHERE spice_jar.id = ?";
-$sqlUpdateSpiceJar = "UPDATE spice_jar SET size=?, percentage=? WHERE id = ?";
+$sqlUpdateSpiceJar = "UPDATE spice_jar SET size=?, percentage=?, category_id=?, quantity=? WHERE id = ?";
+$sqlUpdateSpice = "UPDATE spice SET name = ? Where id = ?";
 
 
 ?>

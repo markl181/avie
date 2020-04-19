@@ -103,8 +103,8 @@ if(isset($_POST['submit']))
             || $dbQuantity <> $quantity)
         {
 
-            
-            $sqlUpdateSpiceJar = "UPDATE spice_jar SET size=?, percentage=?, category_id=?, quantity=? WHERE id = ?";
+
+
 
             $pdo->query($sqlUpdateSpiceJar, ['binds'=>[$size, $amount,$categoryId, $quantity, $formId], 'type'=>'update']);
 
@@ -181,9 +181,9 @@ $pdo->query($sqlGetSpices, ['fetch'=>'all']);
 $spicesList = $pdo->result;
 $spiceName = '';
 $spiceTotal = 0;
+$spiceTotalPer = 0;
 $spiceKey = '';
-
-
+$count = 0;
 
 foreach($spicesList as $key=>&$spiceRow)
     {
@@ -191,20 +191,34 @@ foreach($spicesList as $key=>&$spiceRow)
         //troubleshoot($spiceRow);
 
         $spiceRow['total'] = round($spiceRow['size'] * ($spiceRow['amount']/100) * $spiceRow['quantity']);
+        $spiceRow['totalper'] = $spiceRow['amount'];
+        $spiceRow['count'] = $count;
 
         if($spiceRow['spice'] == $spiceName)
         {
+            //increment
             $spicesList[$spiceKey]['total'] += $spiceRow['total'];
             $spiceRow['total'] += $spiceTotal;
 
+            $spicesList[$spiceKey]['totalper'] += $spiceRow['totalper'];
+            $spiceRow['totalper'] += $spiceTotalPer;
+
+            $spicesList[$spiceKey]['count'] = $spiceRow['count'];
+            $spiceRow['count']++;
         }
 
         $spiceName = $spiceRow['spice'];
         $spiceTotal = $spiceRow['total'];
+        $spiceTotalPer = $spiceRow['totalper'];
+        $count =  $spiceRow['count'];
+
         $spiceKey = $key;
+
+
+
     }
 
-
+troubleshoot($spicesList);
 
 //usort($spicesList, "sizesort");
 

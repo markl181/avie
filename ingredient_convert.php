@@ -90,6 +90,8 @@ echo "Running list of updated ingredients<br/>";
         $ingredientList = $pdo->result;
         $insertCount = 0;
 
+
+
         foreach($ingredientList as $ingredient)
         {
 
