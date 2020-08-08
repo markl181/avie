@@ -344,7 +344,7 @@ class simple_pdo
     else
     {
         //need to insert a record
-        $this->query($this->insertQuery, ['binds'=>$this->insertBinds, 'type'=>'insert']);
+		$this->query($this->insertQuery, ['binds'=>$this->insertBinds, 'type'=>'insert']);
 
         $this->recordId = $this->rowNum;
         if($this->logFind === true)

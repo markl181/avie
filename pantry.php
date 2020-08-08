@@ -27,8 +27,8 @@ if(isset($_POST['submit']))
 
     //troubleshoot($_POST);
 
-    $spice = filter_var($_POST['spice'], FILTER_SANITIZE_STRING);
-    $spice = ucwords($spice);
+    $pantryItem = filter_var($_POST['spice'], FILTER_SANITIZE_STRING);
+    $pantryItem = ucwords($pantryItem);
     $container = filter_var($_POST['jar'], FILTER_SANITIZE_NUMBER_INT
     );
     $category = filter_var($_POST['category'], FILTER_SANITIZE_STRING);
@@ -55,8 +55,6 @@ if(isset($_POST['submit']))
         $pdo->find_id();
         $categoryId = $pdo->recordId;
 
-        //troubleshoot($categoryId);
-
     }
 
     if(!$formId)
@@ -66,9 +64,9 @@ if(isset($_POST['submit']))
         $pdo->idColumn = 'id';
         $pdo->searchColumn = 'name';
         $pdo->searchTable = 'spice';
-        $pdo->searchValue = $spice;
+        $pdo->searchValue = $pantryItem;
         $pdo->insertQuery = $sqlInsertSpice;
-        $pdo->insertBinds = [$spice];
+        $pdo->insertBinds = [$pantryItem];
 
         $pdo->find_id();
         $itemId = $pdo->recordId;
@@ -79,8 +77,14 @@ if(isset($_POST['submit']))
 
         if(!$spiceJar)
         {
+            //this inserts the first value, we add a history row too
+
             $pdo->query($sqlInsertSpiceJar, ['binds'=>[$itemId, $container, $categoryId, $amount, $size, $quantity]
                 , 'type'=>'insert']);
+
+            $spiceJarId = $pdo->recordId;
+
+            $pdo->query($sqlInsertSpiceJarHistory, ['binds'=>[$spiceJarId, $amount], 'type'=>'insert']);
 
         }
 
@@ -92,32 +96,37 @@ if(isset($_POST['submit']))
         $pdo->query($sqlGetSpiceJarById, ['binds'=>[$formId],'fetch'=>'one']);
         $dbRow = $pdo->result;
 
-        $dbSpice = $dbRow['spice'];
+        $dbPantryItem = $dbRow['spice'];
         $dbContainer = $dbRow['container'];
         $dbCategory = $dbRow['category_id'];
         $dbAmount = $dbRow['amount'];
         $dbSize = $dbRow['size'];
         $dbQuantity = $dbRow['quantity'];
+        $dbPantryItemId = $dbRow['id'];
 
-        if($dbAmount <> $amount || $dbSize <> $size || $dbSpice <> $spice || $categoryId <> $dbCategory
+
+        if($dbAmount <> $amount || $dbSize <> $size || $dbPantryItem <> $pantryItem || $categoryId <> $dbCategory
             || $dbQuantity <> $quantity)
         {
 
-
-
-
             $pdo->query($sqlUpdateSpiceJar, ['binds'=>[$size, $amount,$categoryId, $quantity, $formId], 'type'=>'update']);
 
-            //@@todo update name if needed
+            if($dbPantryItem <> $pantryItem)
+            {
+                $pdo->query($sqlUpdateSpice, ['binds'=>[$pantryItem, $dbPantryItemId], 'type'=>'update']);
+
+
+
+            }
+
+            $pdo->query($sqlInsertSpiceJarHistory, ['binds'=>[$formId, $amount], 'type'=>'insert']);
+
 
         }
 
     }
 
-
-
-
-
+    
 
 }
 
@@ -130,7 +139,7 @@ if(isset($_GET['id'])) {
     $pdo->query($sqlGetSpiceJarById, ['binds'=>[$id], 'fetch'=>'one']);
     $dbRow = $pdo->result;
 
-    $dbSpice = $dbRow['spice'];
+    $dbPantryItem = $dbRow['spice'];
     $container = $dbRow['container'];
     $dbCategory = $dbRow['category_id'];
     $dbAmount = $dbRow['amount'];
@@ -159,8 +168,9 @@ if($dbQuantity == '' || $dbQuantity == 0)
 }
 
 $form->open();
+$form->input('livesearch','Search:',['type'=>'text','onkeyup'=>'showResult(this.value)']);
 $form->input('spice','Item:',['type'=>'text','required'=>'required','autofocus'=>'autofocus'
-    ,'value'=>$dbSpice,'autocomplete'=>'autocomplete']);
+    ,'value'=>$dbPantryItem,'autocomplete'=>'autocomplete']);
 //$form->input('container','Container:',['type'=>'text','required'=>'required','autofocus'=>'autofocus']);
 $form->datalist_query('category','Category:',$catsList, 'name','id',$category);
 $form->selectquery('jar','Container:',$jarsList, 'name','id', $container);
@@ -171,6 +181,7 @@ $form->input('quantity','Quantity:',['type'=>'number','min'=>0,'required'=>'requ
 $form->input('amount','% Full:',['type'=>'number','min'=>0,'max'=>100,'value'=>$dbAmount]);
 $form->hidden('spicejar_id', $id);
 
+Bootstrap4::tag_open('div',['id'=>'livesearch','class'=>'search'],'',true);
 
 Bootstrap4::linebreak(2);
 Bootstrap4::table(['Item','Category','Container','Qty','Size (g)','% Full','Total Amount (g)','Updated']);
@@ -218,10 +229,6 @@ foreach($spicesList as $key=>&$spiceRow)
 
     }
 
-troubleshoot($spicesList);
-
-//usort($spicesList, "sizesort");
-
 
 foreach($spicesList as $spiceRowItem)
 {
@@ -237,6 +244,9 @@ foreach($spicesList as $spiceRowItem)
     $pdo->query($sqlGetLastPantryUpdate, ['binds'=>[$spiceRowItem['id']],'fetch'=>'one']);
     $update = $pdo->result['ts'];
     $update = get_date('Y-m-d',$update);
+
+    $percent = new NumberFormatter('en_US', NumberFormatter::PERCENT);
+    $spiceRowItem['amount'] = $percent->format($spiceRowItem['amount']/100);
 
     Bootstrap4::table_row([$spiceRowItem['spice'],$spiceRowItem['category'],$spiceRowItem['container']
         ,$spiceRowItem['quantity'],$spiceRowItem['size']

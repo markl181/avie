@@ -54,7 +54,10 @@ $sqlInsertFood = "INSERT INTO avie_food (name, level_id) VALUES (?, ?)";
 $sqlInsertTag = "INSERT INTO avie_tag (name) VALUES (?)";
 $sqlInsertIngredient = "INSERT INTO avie_ingredient (name) VALUES (?)";
 
-$sqlSelectRecipeTag = "SELECT * FROM avie_recipe_tag WHERE recipe_id = ? AND tag_id = ?";
+$sqlSelectRecipeTag = "SELECT * FROM avie_recipe_tag WHERE recipe_id = ? AND tag_id = ? AND isdelete = 0";
+
+$sqlSelectAllRecipeTags = "SELECT name FROM avie_recipe_tag art INNER JOIN avie_tag att ON art.tag_id = att.id 
+WHERE recipe_id = ? AND isdeleted = 0";
 $sqlInsertRecipeTag = "INSERT INTO avie_recipe_tag (recipe_id, tag_id) VALUES (?,?)";
 $sqlSelectRecipeIngredient = "SELECT * FROM avie_recipe_ingredient WHERE recipe_id = ? AND ingredient_id = ?";
 $sqlInsertRecipeIngredient = "INSERT INTO avie_recipe_ingredient (recipe_id, ingredient_id) VALUES (?,?)";
@@ -105,7 +108,8 @@ WHERE al.name = 'Green'
 GROUP BY recipe_id
 ) greenj ON greenj.recipe_id = ar.public_id 
 WHERE afi.food_id = ?
-AND isdeleted = 0
+AND ar.isdeleted = 0
+AND art.isdeleted = 0
 ORDER BY ar.course, ar.title
 ";
 
@@ -117,8 +121,11 @@ $sqlGetRecipeTags = "SELECT
  GROUP_CONCAT(att.name) tags
 from avie_recipe_tag art 
 INNER JOIN avie_tag att ON att.id = art.tag_id   
-WHERE art.recipe_id = ?    
+WHERE art.recipe_id = ?  
+AND art.isdeleted = 0
  ";
+$sqlGetTagByName = "SELECT id FROM avie_tag WHERE name like ?";
+$sqlRemoveTag = "UPDATE avie_recipe_tag SET isdeleted = 1 WHERE tag_id = ? AND recipe_id = ?";
 $sqlGetRecipesWithDetails = "SELECT * from avie_recipe ar 
 LEFT OUTER JOIN avie_recipe_tag art ON art.recipe_id = ar.public_id
 LEFT OUTER JOIN avie_tag att ON att.id = art.tag_id
@@ -226,7 +233,7 @@ WHERE
 (rating = 5 OR rating = 0 OR att.name = 'Avie-Approved') 
   AND
 (course = '' OR course = 'Desserts and Treats' OR course = 'Main Course')    
-AND isdeleted = 0
+AND art.isdeleted = 0
 ORDER BY RAND(),
 rating DESC, course, title
 LIMIT 100
@@ -382,7 +389,7 @@ $sqlUpdateRequestStatus = "UPDATE avie_recipe_request SET active = 0 WHERE id = 
 
 /*Pantry*/
 
-$sqlInsertIngredient = "INSERT INTO ingredients (name) VALUES (?)";
+$sqlInsertSeasonalIngredient = "INSERT INTO ingredients (name) VALUES (?)";
 $sqlSelectIngredient = "SELECT id, name FROM ingredients ORDER BY name";
 $sqlSelectSeason = "SELECT id, name FROM season ORDER BY month";
 $sqlIngredientReport = "SELECT i.id, i.name FROM ingredients i ORDER BY i.name";
@@ -458,6 +465,8 @@ $sqlInsertJar = "INSERT INTO jar (name) VALUES (?)";
 $sqlGetSpiceJar = "SELECT id FROM spice_jar WHERE spice_id = ? AND jar_id = ?";
 $sqlInsertSpiceJar = "INSERT INTO spice_jar (spice_id, jar_id, category_id, percentage, size, quantity) 
 VALUES (?,?,?,?,?,?)";
+$sqlInsertSpiceJarHistory = "INSERT INTO spice_jar_history (spice_jar_id, percentage) VALUES (?,?)";
+
 $sqlGetLastPantryUpdate = "SELECT MAX(timestamp) as ts FROM spice_jar WHERE spice_id = ? ";
 $sqlGetSpiceJarById = "SELECT spice.id, spice_jar.id record_id, spice.name spice, jar.id container
      , spice_jar.percentage amount, spice_jar.size, category_id, ct.name category, quantity FROM spice 
@@ -467,6 +476,7 @@ left outer join category ct on ct.id = spice_jar.category_id
 WHERE spice_jar.id = ?";
 $sqlUpdateSpiceJar = "UPDATE spice_jar SET size=?, percentage=?, category_id=?, quantity=? WHERE id = ?";
 $sqlUpdateSpice = "UPDATE spice SET name = ? Where id = ?";
+
 
 
 ?>

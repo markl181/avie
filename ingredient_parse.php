@@ -66,34 +66,33 @@ else
 
         $i = 0;
 
-        while (($data = fgetcsv($file, 0, ",")) !==FALSE && $i <= $rowLimit)
+        while (($fileData = fgetcsv($file, 0, ",")) !==FALSE && $i <= $rowLimit)
         {
             // Read the data
             if($i == 0)
             {
-                display($data);
+                //display the headers
+                display($fileData);
             }
-
-
-            if($i > 0)
+            else
             {
                 //exclude header row
                 set_time_limit(30);
-                $title = $data[0];
-                $course = $data[1];
-                $mainIngredient = $data[3];
-                $url = $data[6];
-                $website = $data[7];
-                $prepTime = $data[8];
-                $cookTime = $data[9];
-                $servings = $data[11];
-                $yield = $data[12];
-                $ingredients = $data[13];
-                $tags = $data[15];
-                $rating = $data[16];
-                $publicUrl = $data[17];
-                $photo = $data[18];
-                $updatedAt = $data[31];
+                $title = $fileData[0];
+                $course = $fileData[1];
+                $mainIngredient = $fileData[3];
+                $url = $fileData[6];
+                $website = $fileData[7];
+                $prepTime = $fileData[8];
+                $cookTime = $fileData[9];
+                $servings = $fileData[11];
+                $yield = $fileData[12];
+                $ingredients = $fileData[13];
+                $tags = $fileData[15];
+                $rating = $fileData[16];
+                $publicUrl = $fileData[17];
+                $photo = $fileData[18];
+                $updatedAt = $fileData[31];
 
                 //initial processing
                 $tags = explode(", ",$tags);
@@ -101,8 +100,6 @@ else
                 $publicId = str_ireplace('https://www.plantoeat.com/recipes/','',$publicUrl);
 
                 $pdo->logFind = true;
-
-
 
                 if($title <> '' && is_numeric($publicId))
                 {
@@ -113,6 +110,7 @@ else
                     $pdo->query($sqlGetRecipeByPublicId, ['binds'=>[$publicId], 'fetch'=>'one']);
                     $recipe = $pdo->result;
 
+
                     if($recipe)
                     {
                         //recipe exists, check the update date
@@ -120,13 +118,57 @@ else
                         $dbUpdatedAtDt = new DateTime($dbUpdatedAt);
                         $updatedAtDt = new DateTime($updatedAt);
 
+
                         if($dbUpdatedAtDt < $updatedAtDt)
                         {
 
                             //process update
                             $pdo->query($sqlUpdateRecipe, ['binds'=>[$title, $course, $mainIngredient, $url
-                                , $website, $prepTime, $cookTime, $servings, $yield, $rating, $publicUrl, $photo
+                                , $website, $prepTime, $cookTime, $servings, $yield, $rating === '' ? null : $rating
+                                , $publicUrl, $photo
                                 , $updatedAt,$publicId],'type'=>'update']);
+
+                            //get database tags as array and compare
+                            $pdo->query($sqlSelectAllRecipeTags, ['binds'=>[$publicId], 'fetch'=>'all']);
+                            $dbFullTags = $pdo->result;
+
+                            $dbFullTags = array_flatten($dbFullTags, 'name');
+
+                            $missingTags = array_diff($dbFullTags, $tags);
+
+                            if(count($missingTags) > 0)
+                            {
+                                //remove the tag from the database for the recipe
+
+
+
+                                foreach($missingTags as $missingTag)
+                                {
+                                    echo "removed tag $missingTag from recipe $publicId<br/>";
+
+                                    $pdo->query($sqlGetTagByName, ['binds'=>[$missingTag], 'fetch'=>'all']);
+
+                                    $tagIdList = $pdo->result;
+
+                                    foreach($tagIdList as $tagItem)
+                                    {
+
+                                        //remove the record
+                                        $pdo->query($sqlRemoveTag, ['binds'=>[$tagItem['id'], $publicId]
+                                            , 'type'=>'delete']);
+
+                                    }
+
+
+                                    unset($tagIdList);
+                                }
+
+
+
+                                unset($missingTags);
+                            }
+
+
 
                             foreach($tags as $tag) {
                                 if($tag <> '') {
@@ -147,12 +189,11 @@ else
 
                                     if(!$recipeTag)
                                     {
-
+                                        //tag exists in recipe but not in file
                                         $pdo->query($sqlInsertRecipeTag, ['binds'=>[$publicId, $tagId], 'type'=>'insert']);
                                         echo "Recipe Tag Created for recipe $publicId<br/>";
                                     }
 
-                                    //@@todo do we want to remove any tags that were removed?
 
 
                                 }
@@ -162,7 +203,6 @@ else
                             {
                                 if($ingredient <> '') {
 
-                                    //$ingredient = str_ireplace("1/2 cup","",$ingredient);
                                     $ingredient = parse_ingredient($ingredient);
 
                                     //check if the record already exists and insert it if not
@@ -171,6 +211,7 @@ else
                                     $pdo->searchTable = 'avie_ingredient';
                                     $pdo->searchValue = $ingredient;
                                     $pdo->insertQuery = $sqlInsertIngredient;
+
                                     $pdo->insertBinds = [$ingredient];
 
                                     $pdo->find_id();
@@ -196,17 +237,7 @@ else
 
                             }
 
-                            /* if($course <> 'Main Course')
-                             {
-                                 //display($publicId);
-                                 //$k++;
-                             }
 
-
-                             if($k > 5)
-                             {
-                                 //exit;
-                             }*/
                         }
                         else
                         {
@@ -255,7 +286,6 @@ else
                         {
                             if($ingredient <> '') {
 
-                                //$ingredient = str_ireplace("1/2 cup","",$ingredient);
                                 $ingredient = parse_ingredient($ingredient);
 
                                 //check if the record already exists and insert it if not
@@ -291,7 +321,8 @@ else
 
                         //need to add recipe
                         $pdo->query($sqlInsertRecipe, ['binds'=>[$publicId, $title, $course, $mainIngredient, $url
-                            , $website, $prepTime, $cookTime, $servings, $yield, $rating, $publicUrl, $photo, $updatedAt]
+                            , $website, $prepTime, $cookTime, $servings, $yield, $rating === '' ? null : $rating
+                            , $publicUrl, $photo, $updatedAt]
                             , 'type'=>'insert']);
 
                         echo "Recipe $publicId Created<br/>";
@@ -325,6 +356,7 @@ else
 
 
 
+
     }
 
     //now compare the arrays of recipes
@@ -332,6 +364,9 @@ else
     //add array size protection
     if(count($activeRecipes) > 1000)
     {
+
+        //@@todo change to array_diff with flatten
+
         foreach($databaseRecipes as $databaseRecipe)
         {
 
@@ -339,7 +374,7 @@ else
             {
 
                 $pdo->query($sqlInactivateRecipe, ['binds'=>[$databaseRecipe['id']],'type'=>'update']);
-                echo $databaseRecipe['public_id']." has been deleted<br/>";
+                echo $databaseRecipe['public_id']." has been inactivated<br/>";
 
             }
 
@@ -357,6 +392,5 @@ else
 
 }
 
-//include 'footer.php';
 
 ?>

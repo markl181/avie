@@ -49,7 +49,7 @@ if(isset($_POST['submit'])) {
         $ingredientId = $pdo->result['id'];
     }
     else {
-        $pdo->query($sqlInsertIngredient, ['binds' => [$ingredient], 'type' => 'insert']);
+        $pdo->query($sqlInsertSeasonalIngredient, ['binds' => [$ingredient], 'type' => 'insert']);
 
         $ingredientId = $pdo->rowNum;
 
