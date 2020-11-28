@@ -35,6 +35,8 @@ include 'header_log.php';
  *
  */
 
+error_reporting(1);
+
 $start = microtime(true);
 
 $path = $_SERVER['SCRIPT_FILENAME'];
@@ -62,6 +64,9 @@ else
 
     foreach($filesArray as $fileItem)
     {
+
+        echo "Filename: ".$fileItem['file']."<br/>";
+
         $file = fopen($fileItem['file'], 'r');
 
         $i = 0;
@@ -104,12 +109,13 @@ else
                 if($title <> '' && is_numeric($publicId))
                 {
 
+                    //echo "Processing recipe $i $publicId<br>";
+
                     $activeRecipes[] = $publicId;
 
                     //check recipe based on public url
                     $pdo->query($sqlGetRecipeByPublicId, ['binds'=>[$publicId], 'fetch'=>'one']);
                     $recipe = $pdo->result;
-
 
                     if($recipe)
                     {
@@ -117,7 +123,6 @@ else
                         $dbUpdatedAt = $recipe['updated_at'];
                         $dbUpdatedAtDt = new DateTime($dbUpdatedAt);
                         $updatedAtDt = new DateTime($updatedAt);
-
 
                         if($dbUpdatedAtDt < $updatedAtDt)
                         {
@@ -127,6 +132,11 @@ else
                                 , $website, $prepTime, $cookTime, $servings, $yield, $rating === '' ? null : $rating
                                 , $publicUrl, $photo
                                 , $updatedAt,$publicId],'type'=>'update']);
+
+
+                            //check tags
+
+                            //remove tags
 
                             //get database tags as array and compare
                             $pdo->query($sqlSelectAllRecipeTags, ['binds'=>[$publicId], 'fetch'=>'all']);
@@ -139,8 +149,6 @@ else
                             if(count($missingTags) > 0)
                             {
                                 //remove the tag from the database for the recipe
-
-
 
                                 foreach($missingTags as $missingTag)
                                 {
@@ -168,7 +176,7 @@ else
                                 unset($missingTags);
                             }
 
-
+                            //add tags
 
                             foreach($tags as $tag) {
                                 if($tag <> '') {
@@ -198,6 +206,48 @@ else
 
                                 }
                             }
+
+                            //remove ingredients
+
+                            //get database ingredients as array and compare
+                            $pdo->query($sqlSelectAllRecipeIngredients, ['binds'=>[$publicId], 'fetch'=>'all']);
+                            $dbFullIngredients = $pdo->result;
+
+                            $dbFullIngredients = array_flatten($dbFullIngredients, 'name');
+
+                            $missingIngs = array_diff($dbFullIngredients, $ingredients);
+
+                            if(count($missingIngs) > 0)
+                            {
+                                //remove the tag from the database for the recipe
+
+                                foreach($missingIngs as $missingIng)
+                                {
+                                    echo "removed ingredient $missingIng from recipe $publicId<br/>";
+
+                                    $pdo->query($sqlGetIngredientByName, ['binds'=>[$missingIng], 'fetch'=>'all']);
+
+                                    $ingIdList = $pdo->result;
+
+                                    foreach($ingIdList as $ingItem)
+                                    {
+
+                                        //remove the record
+                                        $pdo->query($sqlRemoveIngredient, ['binds'=>[$ingItem['id'], $publicId]
+                                            , 'type'=>'delete']);
+
+                                    }
+
+
+                                    unset($ingIdList);
+                                }
+
+
+
+                                unset($missingIngs);
+                            }
+
+                            //add ingredients
 
                             foreach ($ingredients as $ingredient)
                             {
@@ -251,6 +301,8 @@ else
                     }
                     else
                     {
+
+                        //new recipes\
 
                         foreach($tags as $tag) {
                             if($tag <> '') {
@@ -336,6 +388,9 @@ else
 
 
                 }
+                else
+                {echo "record $publicId skipped<br>";}
+
 
 
             }
@@ -352,6 +407,10 @@ else
         if(rename($fileItem['file'],$archiveFolder."/".$fileItem['file']))
         {
             echo $fileItem['file']." archived <br/><br/>";
+        }
+        else
+        {
+            echo "Error archiving file<br/>";
         }
 
 

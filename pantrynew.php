@@ -8,8 +8,6 @@ $pageTitle = 'Cooking - Pantry';
 require 'header.php';
 
 Bootstrap4::menu($menu, basename(__FILE__));
-Bootstrap4::heading("<a href='shoppinglist.php'>Shopping List</a><br>",4);
-
 
 /*
  * Estimate how much is left by adding up all the amounts and percentages
@@ -170,7 +168,7 @@ if($dbQuantity == '' || $dbQuantity == 0)
 }
 
 $form->open();
-//$form->input('livesearch','Search:',['type'=>'text','onkeyup'=>'showResult(this.value)']);
+$form->input('livesearch','Search:',['type'=>'text','onkeyup'=>'showResult(this.value)']);
 $form->input('spice','Item:',['type'=>'text','required'=>'required','autofocus'=>'autofocus'
     ,'value'=>$dbPantryItem,'autocomplete'=>'autocomplete']);
 //$form->input('container','Container:',['type'=>'text','required'=>'required','autofocus'=>'autofocus']);
@@ -183,14 +181,23 @@ $form->input('quantity','Quantity:',['type'=>'number','min'=>0,'required'=>'requ
 $form->input('amount','% Full:',['type'=>'number','min'=>0,'max'=>100,'value'=>$dbAmount]);
 $form->hidden('spicejar_id', $id);
 
-//Bootstrap4::tag_open('div',['id'=>'livesearch','class'=>'search'],'',true);
-$form->submit();
-echo "<a role='button' href='pantry.php' class='btn btn-primary' name='clear'>Clear</a>";
+Bootstrap4::tag_open('div',['id'=>'livesearch','class'=>'search'],'test',true);
 
 Bootstrap4::linebreak(2);
 Bootstrap4::table(['Item','Category','Container','Qty','Size (g)','% Full','Total Amount (g)','Updated']);
 
 $rowClass = 'clickable-row';
+
+$sqlGetSpices = "SELECT spice.id, spice_jar.id record_id, spice.name spice, jar.name container
+     , spice_jar.percentage amount, spice_jar.size, ct.name category, quantity
+FROM spice 
+left outer join spice_jar on spice.id = spice_jar.spice_id
+left outer join jar on jar.id = spice_jar.jar_id
+left outer join category ct on ct.id = spice_jar.category_id
+WHERE 1=1
+ORDER BY ct.name, spice.name
+LIMIT 20
+";
 
 $pdo->query($sqlGetSpices, ['fetch'=>'all']);
 $spicesList = $pdo->result;
@@ -239,14 +246,9 @@ foreach($spicesList as $spiceRowItem)
 
     $url = $_SERVER['PHP_SELF'] . "?id=" . $spiceRowItem['record_id'];
 
-    $percent = new NumberFormatter('en_US', NumberFormatter::PERCENT);
-    $spiceRowItem['amount'] = $percent->format($spiceRowItem['amount']/100);
-
     if($spiceRowItem['amount'] < $cutoff)
     {
         $spiceRowItem['amount'] .= "|".$highlightRed;
-
-        //troubleshoot($spiceRowItem);
     }
 
     //get last update
@@ -254,7 +256,8 @@ foreach($spicesList as $spiceRowItem)
     $update = $pdo->result['ts'];
     $update = get_date('Y-m-d',$update);
 
-
+    $percent = new NumberFormatter('en_US', NumberFormatter::PERCENT);
+    $spiceRowItem['amount'] = $percent->format($spiceRowItem['amount']/100);
 
     Bootstrap4::table_row([$spiceRowItem['spice'],$spiceRowItem['category'],$spiceRowItem['container']
         ,$spiceRowItem['quantity'],$spiceRowItem['size']
@@ -268,6 +271,8 @@ foreach($spicesList as $spiceRowItem)
 
 Bootstrap4::table_close();
 
+$form->submit();
+echo "<a role='button' href='pantry.php' class='btn btn-primary' name='clear'>Clear</a>";
 $form->close();
 
 include 'footer.php';

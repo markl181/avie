@@ -11,10 +11,10 @@ Created by Mark Leci - 2020-06-24
 //$xmlDoc->load("links.xml");
 
 //$x=$xmlDoc->getElementsByTagName('link');
-error_reporting(E_ALL);
+//error_reporting(E_ALL);
 
 
-var_dump($_GET);
+//var_dump($_GET);
 
 $host = "markleci.com";
 $dbname = "markleci_food";
@@ -23,6 +23,8 @@ $pass = "v%r0qC0dM2*2";
 
 require_once '../functions.php';
 require_once '../qrs.php';
+
+error_reporting(0);
 
 $sqlGetSpices = "SELECT spice.id, spice_jar.id record_id, spice.name spice, jar.name container
      , spice_jar.percentage amount, spice_jar.size, ct.name category, quantity
@@ -45,7 +47,7 @@ $pdo = new simple_pdo($host, $dbname, $user, $pass);
 $pdo->query($sqlGetSpices, ['fetch'=>'all']);
 $itemList = $pdo->result;
 
-var_dump($itemList);
+//var_dump($itemList);
 
 while ($row = $itemList) {
     $sx_cr = $elementChild->addChild('title');

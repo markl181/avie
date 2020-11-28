@@ -565,6 +565,8 @@ class Bootstrap4
                 {
                     $cellReturn .= "style='background: $cellColour'";
 
+
+
                 }
 
                 if($cellLink <> '') {

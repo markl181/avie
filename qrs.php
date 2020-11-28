@@ -54,10 +54,18 @@ $sqlInsertFood = "INSERT INTO avie_food (name, level_id) VALUES (?, ?)";
 $sqlInsertTag = "INSERT INTO avie_tag (name) VALUES (?)";
 $sqlInsertIngredient = "INSERT INTO avie_ingredient (name) VALUES (?)";
 
-$sqlSelectRecipeTag = "SELECT * FROM avie_recipe_tag WHERE recipe_id = ? AND tag_id = ? AND isdelete = 0";
+$sqlSelectRecipeTag = "SELECT * FROM avie_recipe_tag WHERE recipe_id = ? AND tag_id = ? AND isdeleted = 0";
 
 $sqlSelectAllRecipeTags = "SELECT name FROM avie_recipe_tag art INNER JOIN avie_tag att ON art.tag_id = att.id 
 WHERE recipe_id = ? AND isdeleted = 0";
+
+$sqlSelectAllRecipeIngredients = "SELECT
+NAME
+FROM avie_recipe_ingredient ari 
+INNER JOIN avie_ingredient ai ON ai.id = ari.ingredient_id
+WHERE recipe_id = ? 
+AND ari.isdeleted = 0";
+
 $sqlInsertRecipeTag = "INSERT INTO avie_recipe_tag (recipe_id, tag_id) VALUES (?,?)";
 $sqlSelectRecipeIngredient = "SELECT * FROM avie_recipe_ingredient WHERE recipe_id = ? AND ingredient_id = ?";
 $sqlInsertRecipeIngredient = "INSERT INTO avie_recipe_ingredient (recipe_id, ingredient_id) VALUES (?,?)";
@@ -68,6 +76,7 @@ $sqlFilterRecipeByIngredient = "SELECT DISTINCT ar.*
 , ifnull(redct,0) redct
 , ifnull(greenct,0) greenct
 , GROUP_CONCAT(att.name)
+, ar.dateadded
 from avie_recipe ar
 INNER JOIN avie_recipe_ingredient ari ON ari.recipe_id = ar.public_id
 INNER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
@@ -114,7 +123,10 @@ ORDER BY ar.course, ar.title
 ";
 
 $sqlGetRecipeByPublicId = "SELECT id, updated_at, title FROM avie_recipe WHERE public_id = ? AND isdeleted = 0";
-$sqlGetRecipes = "SELECT * from avie_recipe ORDER BY course, title WHERE isdeleted = 0";
+$sqlGetRecipeByRequestId = "SELECT ar.id, updated_at, title FROM avie_recipe ar
+INNER JOIN avie_recipe_request arr ON arr.recipe_id = ar.public_id
+ WHERE arr.id = ?";
+$sqlGetRecipes = "SELECT * from avie_recipe WHERE isdeleted = 0 ORDER BY course, title ";
 $sqlGetRecipeCount = "SELECT count(1) AS ct from avie_recipe";
 $sqlGetRecipeCourseCount = "SELECT count(1) AS ct from avie_recipe WHERE course = ? AND isdeleted = 0";
 $sqlGetRecipeTags = "SELECT 
@@ -126,6 +138,7 @@ AND art.isdeleted = 0
  ";
 $sqlGetTagByName = "SELECT id FROM avie_tag WHERE name like ?";
 $sqlRemoveTag = "UPDATE avie_recipe_tag SET isdeleted = 1 WHERE tag_id = ? AND recipe_id = ?";
+$sqlRemoveIngredient = "UPDATE avie_recipe_ingredient SET isdeleted = 1 WHERE ingredient_id = ? AND recipe_id = ?";
 $sqlGetRecipesWithDetails = "SELECT * from avie_recipe ar 
 LEFT OUTER JOIN avie_recipe_tag art ON art.recipe_id = ar.public_id
 LEFT OUTER JOIN avie_tag att ON att.id = art.tag_id
@@ -183,7 +196,7 @@ WHERE al.name = 'Green'
 GROUP BY recipe_id
 ) greenj ON greenj.recipe_id = ar.public_id 
 WHERE 1=1
-AND isdeleted = 0
+AND ar.isdeleted = 0
 ";
 
 $sqlGetRecipesDefault = "
@@ -233,10 +246,10 @@ WHERE
 (rating = 5 OR rating = 0 OR att.name = 'Avie-Approved') 
   AND
 (course = '' OR course = 'Desserts and Treats' OR course = 'Main Course')    
-AND art.isdeleted = 0
+AND ar.isdeleted = 0
 ORDER BY RAND(),
 rating DESC, course, title
-LIMIT 100
+LIMIT 50
 ";
 
 $sqlGetActiveRecipes = "SELECT id, public_id FROM avie_recipe WHERE isdeleted = 0";
@@ -286,7 +299,7 @@ WHERE al.name = 'Green'
 GROUP BY recipe_id
 ) greenj ON greenj.recipe_id = ar.public_id 
 WHERE ifnull(blackct,0) = 0  
-AND isdeleted = 0
+AND ar.isdeleted = 0
 ORDER BY course, title
 ";
 
@@ -356,6 +369,8 @@ $sqlInsertUpdate = "INSERT INTO avie_update (type) VALUES (?)";
 $sqlGetRequests = "SELECT arr.id, arr.active, arr.date, ar.title, ar.course 
 , redct, greenct
 , public_url
+, priority
+, xrequested
 FROM avie_recipe_request arr 
 INNER JOIN avie_recipe ar ON ar.public_id = arr.recipe_id
 LEFT OUTER JOIN
@@ -380,11 +395,27 @@ LEFT OUTER JOIN avie_level al ON al.id = af.level_id
 WHERE al.name = 'Green'
 GROUP BY recipe_id
 ) greenj ON greenj.recipe_id = ar.public_id 
-AND isdeleted = 0
-WHERE active = 1";
+LEFT OUTER JOIN 
+(
+SELECT recipe_id, count(distinct arr.id) xrequested
+FROM avie_recipe_request arr 
+INNER JOIN avie_recipe ar ON ar.public_id = arr.recipe_id
+WHERE 
+((arr.date <> '0000-00-00' AND active = 0)
+OR
+arr.active = 1)
+GROUP BY recipe_id
+) rcount ON rcount.recipe_id = ar.public_id
+WHERE active = 1
+  AND ar.isdeleted = 0
+
+ORDER BY 5, 4
+";
 
 $sqlUpdateRequestDate = "UPDATE avie_recipe_request SET date = ? WHERE id = ?";
 $sqlUpdateRequestStatus = "UPDATE avie_recipe_request SET active = 0 WHERE id = ?";
+$sqlUpdateRequestPriority = "UPDATE avie_recipe_request SET priority = ? WHERE id = ?";
+$sqlUpdateRequestPriorityBulk = "UPDATE avie_recipe_request SET priority = 0 WHERE active = 1";
 
 
 /*Pantry*/

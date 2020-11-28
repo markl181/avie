@@ -20,31 +20,16 @@ Bootstrap4::menu($menu, basename(__FILE__),4);
 
 error_reporting(1);
 
-if(isset($_GET))
-{
-    $ingredient = $_GET['ingredient'];
-    $includes = $_GET['include'];
-    $includeBlack = $_GET['includeblack'];
-    $redLimit = $_GET['redlimit'];
-    $greenLimit = $_GET['greenlimit'];
-    $course = $_GET['course'];
-    $rating = $_GET['rating'];
-    $keyword = $_GET['keyword'];
-    $tag = $_GET['tag'];
-    $filters = $_GET['filters'];
-
-    /*parse filters*/
-
-    $includeBlack = filter_var($includeBlack, FILTER_SANITIZE_NUMBER_INT);
-    $keyword = filter_var($keyword, FILTER_SANITIZE_STRING);
-    $rating = filter_var($rating, FILTER_SANITIZE_NUMBER_INT);
-    $course = filter_var($course, FILTER_SANITIZE_STRING);
-    $tag = filter_var($tag, FILTER_SANITIZE_NUMBER_INT);
-    $redLimit = filter_var($redLimit, FILTER_SANITIZE_NUMBER_INT);
-    $greenLimit = filter_var($greenLimit, FILTER_SANITIZE_NUMBER_INT);
-//$filters = filter_var($filters, FILTER_VALIDATE_INT);
-}
-
+$ingredient = $_GET['ingredient'];
+$includes = $_GET['include'];
+$includeBlack = $_GET['includeblack'];
+$redLimit = $_GET['redlimit'];
+$greenLimit = $_GET['greenlimit'];
+$course = $_GET['course'];
+$rating = $_GET['rating'];
+$keyword = $_GET['keyword'];
+$tag = $_GET['tag'];
+$filters = $_GET['filters'];
 
 $approvedTags = ['Avie-Approved','Freezable','Candida diet','Slow Cooker'];
 
@@ -53,21 +38,53 @@ foreach($approvedTags as $approvedTag)
 {
     $tagSelect[] = $approvedTag;
 
+
 }
 
+
+
+
+$includeBlack = filter_var($includeBlack, FILTER_SANITIZE_NUMBER_INT);
+$redLimit = filter_var($redLimit, FILTER_SANITIZE_NUMBER_INT);
+$greenLimit = filter_var($greenLimit, FILTER_SANITIZE_NUMBER_INT);
+$course = filter_var($course, FILTER_SANITIZE_STRING);
+$rating = filter_var($rating, FILTER_SANITIZE_NUMBER_INT);
+$keyword = filter_var($keyword, FILTER_SANITIZE_STRING);
+$tag = filter_var($tag, FILTER_SANITIZE_NUMBER_INT);
+//$filters = filter_var($filters, FILTER_VALIDATE_INT);
 
 foreach($_GET as $key=>$item)
 {
 
     //troubleshoot($filters);
 
-
-
-
     if(strpos($key,'request') !== FALSE)
     {
 
-        $pdo->request($key);
+       $recipeId = str_replace('request_','',$key);
+       $recipeId = filter_var($recipeId, FILTER_SANITIZE_NUMBER_INT);
+
+        //check if the request already exists and insert it if not
+        $sqlGetRequestById = "SELECT id FROM avie_recipe_request WHERE active = 1 AND recipe_id = ?";
+        $sqlInsertRequest = "INSERT INTO avie_recipe_request (recipe_id) VALUES (?)";
+
+        $pdo->query($sqlGetRequestById, ['binds'=>[$recipeId],'fetch'=>'one']);
+
+        if(!$pdo->result)
+        {
+            $pdo->query($sqlInsertRequest, ['binds'=>[$recipeId],'type'=>'insert']);
+            $pdo->query($sqlGetRecipeByPublicId, ['binds'=>[$recipeId], 'fetch'=>'one']);
+
+            $recipeName = $pdo->result['title'];
+
+            $requestMessage = "Request submitted for recipe $recipeName";
+
+            Bootstrap4::error_block($requestMessage,'success');
+
+            mail("lecimark@gmail.com","New Request from Avie's Recipe site",$requestMessage);
+
+        }
+
 
 
     }
@@ -75,7 +92,6 @@ foreach($_GET as $key=>$item)
 
 }
 
-//@@todo - reorganize this
 
 if($ingredient)
 {
@@ -297,16 +313,18 @@ $coursesList = $pdo->result;
 
 //Form
 $form->open('get');
+$form->multiselect('filters[]','Filters: ',[1=>'Keyword',2=>'Recent Recipes',3=>'Rating',4=>'Course'
+    ,5=>'Tag',6=>'Max Red',7=>'Min Green']);
 $form->input('keyword','Keyword: ',['type'=>'text','value'=>$keyword]);
 $form->select('rating','Rating: ',[3=>'Rating >=3', 4=>'Rating >=4'
     , 5=>'Rating 5'], $rating);
 $form->selectquery('course', 'Course: ', $coursesList, 'course'
     , 'course',$course);
 $form->select('tag','Tag: ',$tagSelect, $tag);
-$form->select('course','Course: ',[''=>'','Appetizers'=>'Appetizers','Beverages'=>'Beverages'
+/*$form->select('course','Course: ',[''=>'','Appetizers'=>'Appetizers','Beverages'=>'Beverages'
     ,'Breakfast'=>'Breakfast'
     ,'Dessert'=>'Dessert','Main Course'=>'Main Course','Salad'=>'Salad'
-    ,'Sides'=>'Sides','Soup'=>'Soup'], $course);
+    ,'Sides'=>'Sides','Soup'=>'Soup'], $course);*/
 $form->input('redlimit','Max Red:',['type'=>'number','min'=>0,'max'=>10, 'value'=>$redLimit]);
 $form->input('greenlimit','Min Green:',['type'=>'number','min'=>0,'max'=>10, 'value'=>$greenLimit]);
 //$form->checkbox('compact','Compact View');

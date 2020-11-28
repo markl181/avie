@@ -5,7 +5,7 @@ date_default_timezone_set('America/Denver');
 require 'classes/bootstrap4.php';
 require 'classes/form4.php';
 require 'classes/pdo_query.php';
-require 'classes/fusioncharts.php';
+//require 'classes/fusioncharts.php';
 
 $greenSpan = 'rgba(0, 255, 0, 0.6)';
 $redSpan = 'rgba(255, 0, 0, 0.6)';
@@ -1317,6 +1317,25 @@ class MyDateTime extends DateTime
 
         $this->setDate($y, $m, $d);
     }
+
+}
+
+function get_id($string,$removalString)
+{
+
+    $value = str_replace($removalString,'',$string);
+
+    $value = filter_var($value, FILTER_SANITIZE_NUMBER_INT);
+
+    return $value;
+
+}
+
+function send_email($subject, $message)
+{
+
+
+    mail("lecimark@gmail.com",$subject,$message);
 
 }
 

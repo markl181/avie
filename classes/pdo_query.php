@@ -85,6 +85,7 @@ class simple_pdo
 	public $insertQuery;
 	public $insertBinds = [];
 	public $logFind = false;
+	public $requestString;
 
 	/**
 	 * error_log_query function. Logs a query to a database table
@@ -326,7 +327,40 @@ class simple_pdo
 
 	}
 
+public function request($requestString)
+{
 
+		$recipeId = get_id($requestString, 'request_');
+
+		//check if the request already exists and insert it if not
+		$sqlGetRequestById = "SELECT id FROM avie_recipe_request WHERE active = 1 AND recipe_id = ?";
+		$sqlInsertRequest = "INSERT INTO avie_recipe_request (recipe_id) VALUES (?)";
+
+		$this->query($sqlGetRequestById, ['binds'=>[$recipeId],'fetch'=>'one']);
+
+		if(!$this->result)
+		{
+
+			$sqlGetRecipeByPublicId = "SELECT id, updated_at, title FROM avie_recipe WHERE public_id = ? AND isdeleted = 0";
+
+			$this->query($sqlInsertRequest, ['binds'=>[$recipeId],'type'=>'insert']);
+			$this->query($sqlGetRecipeByPublicId, ['binds'=>[$recipeId], 'fetch'=>'one']);
+
+			$recipeName = $this->result['title'];
+
+			$requestMessage = "Request submitted for recipe $recipeName";
+
+			Bootstrap4::error_block($requestMessage,'success');
+
+			send_email("New Request from Avie's Recipe site",$requestMessage );
+
+		}
+
+
+
+
+
+}
 
  public function find_id()
  {

@@ -327,23 +327,46 @@ echo "<select class='form-control col-sm-$fieldSize' id='$name' name='$name'>";
 	}
 
 
-    /**
-     * select function.
-     *
-     * @access public
-     * @param mixed  $name
-     * @param mixed  $label
-     * @param mixed  $values
-     * @param string $queryField (default: '')
-     * @param string $idField
-     * @param int    $labelWidth (default: 4)
-     * @param int    $fieldSize  (default: 5)
-     * @param string $script     (default: '')
-     * @param string $closeGroup (default: 'y')
-     * @param string $selected   (default: '')
-     * @param string $tooltip    (default: '')
-     * @return void
-     */
+    public function multiselect($name, $label, $values, $selected='')
+    {
+        //get global size from bootstrap
+        $labelWidth = 4;
+        $fieldSize = 5;
+
+        echo "<div class='form-group align-items-center'>";
+        echo "<div class='row'>";
+        echo "<label class='control-label col-sm-$labelWidth' for='$name'>";
+
+
+        echo " $label </label>";
+
+        echo "<select multiple data-live-search='true' class='form-control selectpicker col-sm-$fieldSize' 
+id='$name' name=$name>";
+
+        if ($selected=='')
+        {echo "<option label='' value='' selected></option>";}
+        else
+        {
+            echo "<option label='' value=''></option>";
+        }
+
+        foreach ($values as $value=>$text)
+        {
+            if ($value == $selected && $selected <> '')
+            {echo "<option selected='selected' value='$value'>$text</option>";}
+            else
+            {echo "<option value='$value'>$text</option>";}
+
+        }
+        Bootstrap4::tag_close('select');
+
+        Bootstrap4::tag_close('div');
+
+        Bootstrap4::tag_close('div');
+
+
+    }
+
     public function selectquery($name, $label, $values, $queryField = '', $idField = '', $selected = ''
         , $attributesArray = '')
     {
