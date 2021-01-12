@@ -41,8 +41,6 @@ a.btn-primary a.btn-secondary a[role="button"]{
     color: white !important;
 }
 
-
-
 .fade-in {
     animation: fadeIn ease 7s;
     -webkit-animation: fadeIn ease 7s;

@@ -139,15 +139,6 @@ AND art.isdeleted = 0
 $sqlGetTagByName = "SELECT id FROM avie_tag WHERE name like ?";
 $sqlRemoveTag = "UPDATE avie_recipe_tag SET isdeleted = 1 WHERE tag_id = ? AND recipe_id = ?";
 $sqlRemoveIngredient = "UPDATE avie_recipe_ingredient SET isdeleted = 1 WHERE ingredient_id = ? AND recipe_id = ?";
-$sqlGetRecipesWithDetails = "SELECT * from avie_recipe ar 
-LEFT OUTER JOIN avie_recipe_tag art ON art.recipe_id = ar.public_id
-LEFT OUTER JOIN avie_tag att ON att.id = art.tag_id
-LEFT OUTER JOIN avie_recipe_ingredient ari ON ari.recipe_id = ar.public_id
-LEFT OUTER JOIN avie_food_ingredient afi ON afi.ingredient_id = ari.ingredient_id
-LEFT OUTER JOIN avie_food af ON af.id = afi.food_id
-LEFT OUTER JOIN avie_level al ON al.id = af.level_id
-WHERE isdeleted = 0
-ORDER BY course, title";
 
 $sqlGetRecipesByInclude = "
 SELECT DISTINCT ar.*
@@ -195,8 +186,7 @@ LEFT OUTER JOIN avie_level al ON al.id = af.level_id
 WHERE al.name = 'Green'
 GROUP BY recipe_id
 ) greenj ON greenj.recipe_id = ar.public_id 
-WHERE 1=1
-AND ar.isdeleted = 0
+WHERE ar.isdeleted = 0
 ";
 
 $sqlGetRecipesDefault = "
@@ -247,9 +237,12 @@ WHERE
   AND
 (course = '' OR course = 'Desserts and Treats' OR course = 'Main Course')    
 AND ar.isdeleted = 0
-ORDER BY RAND(),
-rating DESC, course, title
-LIMIT 50
+AND 
+(
+datediff(now(),ar.dateadded) < ?
+OR
+datediff(now(),ar.updated_at) < ?
+)
 ";
 
 $sqlGetActiveRecipes = "SELECT id, public_id FROM avie_recipe WHERE isdeleted = 0";
@@ -488,7 +481,6 @@ FROM spice
 left outer join spice_jar on spice.id = spice_jar.spice_id
 left outer join jar on jar.id = spice_jar.jar_id
 left outer join category ct on ct.id = spice_jar.category_id
-WHERE 1=1
 ORDER BY ct.name, spice.name";
 $sqlInsertSpice = "INSERT INTO spice (name) VALUES (?)";
 $sqlInsertCategory = "INSERT INTO category (name) VALUES (?)";

@@ -3,6 +3,8 @@
 Created by Mark Leci - 2019-12-21
 
 */
+//start the session
+session_start();
 $pageTitle = 'Avie - Foods';
 
 include 'header.php';
@@ -16,8 +18,22 @@ $level = '';
 $dbFood = '';
 $id = '';
 
-$dbFood = $_GET['food'];
+$dbFood = $_SESSION['food'];
 
+if(isset($_SESSION['id'])) {
+
+    //the GET part has to be replaced with SESSION and put first
+    $id = filter_var($_SESSION['id'], FILTER_SANITIZE_NUMBER_INT
+    );
+
+    $pdo->query($sqlGetFoodById, ['binds'=>[$id], 'fetch'=>'one']);
+    $dbRow = $pdo->result;
+
+    $dbFood = $dbRow['name'];
+    $level = $dbRow['level'];
+
+
+}
 
 if(isset($_POST['submit']))
 {
@@ -65,25 +81,13 @@ if(isset($_POST['submit']))
 
     }
 
-
-
-
-
-}
-
-if(isset($_GET['id'])) {
-
-    $id = filter_var($_GET['id'], FILTER_SANITIZE_NUMBER_INT
-    );
-
-    $pdo->query($sqlGetFoodById, ['binds'=>[$id], 'fetch'=>'one']);
-    $dbRow = $pdo->result;
-
-    $dbFood = $dbRow['name'];
-    $level = $dbRow['level'];
-
+    //after the update, unset the form values used so the form is cleared, and end the session
+    unset($dbFood, $level, $dbLevel);
+    session_destroy();
 
 }
+
+
 
 $pdo->query($sqlGetFoods);
 $foodListAr = $pdo->result;
@@ -106,7 +110,7 @@ $form->hidden('food_id', $id);
 $form->selectquery('level', 'Level:', $levelsList, 'name'
     , 'id',$level, ['autofocus'=>'autofocus']);
 $form->submit();
-echo "<a role='button' href='foods.php' class='btn btn-primary' name='clear'>Clear</a>";
+echo "<a role='button' href='foods.php' class='btn btn-primary'>Clear</a>";
 $form->close();
 Bootstrap4::linebreak(2);
 Bootstrap4::error_block("For best results, use the singular form of a food, e.g. almond not almonds. Click a row 
@@ -141,7 +145,8 @@ error_reporting(0);
 foreach($foodListAr as $food)
 {
 
-    $url = $_SERVER['PHP_SELF'] . "?id=" . $food['id'];
+    //send the url to process along with the get values
+    $url = "process.php?ref=foods&id=" . $food['id'];
 
     $food['name'] = "<a href='recipes.php?ingredient=".$food['id']."' target='_blank'>".$food['name']."</a>";
 

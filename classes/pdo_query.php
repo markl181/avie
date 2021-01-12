@@ -9,6 +9,9 @@
 
 namespace tools;
 
+use PDO;
+use PDOException;
+
 class simple_pdo
 {
 
@@ -83,6 +86,8 @@ class simple_pdo
 	public $searchValue;
 	public $recordId;
 	public $insertQuery;
+	public $updateBinds = [];
+	public $updateQuery;
 	public $insertBinds = [];
 	public $logFind = false;
 	public $requestString;
@@ -120,11 +125,10 @@ class simple_pdo
 	 */
 	public function logging($error, $connect = 'no', $query = null, $recordId = null, $customErr = null)
 	{
-		if(SELF::BOOTSTRAP == true)
-		{$size = Bootstrap4::$size;}
+
 		$connect = strtolower($connect);
 
-		if (SELF::SHOWERRORS == true)
+		if (self::SHOWERRORS == true)
 		{
 			//logging is enabled
 
@@ -145,7 +149,7 @@ class simple_pdo
 					//show a custom error
 					$errorString = $error->getMessage() . " ($customErr)";
 				}
-				if(SELF::BOOTSTRAP == true)
+				if(self::BOOTSTRAP == true)
 				{Bootstrap4::error_block($errorString);}
 				else
 				{echo "<br/>$errorString<br/>";}
@@ -154,7 +158,7 @@ class simple_pdo
 			else
 				//log a connect error message and exit
 				{
-				if(SELF::BOOTSTRAP == true)	
+				if(self::BOOTSTRAP == true)	
 				{Bootstrap4::error_block("Connection Error: $error");}
 				else
 				{echo "<br/>Connection Error: $error<br/>";}
@@ -165,7 +169,7 @@ class simple_pdo
 		}
 		else
 		{
-			if(SELF::BOOTSTRAP == true)
+			if(self::BOOTSTRAP == true)
 			{Bootstrap4::error_block($this->errorString);}
 			else
 			{echo "<br/>".$this->errorString."<br/>";}
@@ -192,17 +196,17 @@ class simple_pdo
 		//create connection
 		try {
 
-			$this->DBH = new \PDO("mysql:host=$host;dbname=$dbname", $user, $pass,array(
-					\PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"));
+			$this->DBH = new PDO("mysql:host=$host;dbname=$dbname", $user, $pass,array(
+					PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8"));
 
-			$this->DBH->setAttribute( \PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION );
-			$this->DBH->setAttribute(\PDO::ATTR_ORACLE_NULLS, \PDO::NULL_EMPTY_STRING);//useful attribute to convert '' to null
-			$this->DBH->setAttribute(\PDO::ATTR_TIMEOUT, self::TIMEOUT);
+			$this->DBH->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+			$this->DBH->setAttribute(PDO::ATTR_ORACLE_NULLS, PDO::NULL_EMPTY_STRING);//useful attribute to convert '' to null
+			$this->DBH->setAttribute(PDO::ATTR_TIMEOUT, self::TIMEOUT);
 
 		}
 
 
-		catch(\PDOException $e)
+		catch(PDOException $e)
 		{
 			$this->logging($e, 'yes');
 
@@ -257,11 +261,11 @@ class simple_pdo
 			$this->STH = $this->DBH->prepare($query);
 			if ($mode == 'numeric')
 			{
-				$fetchMode = \PDO::FETCH_NUM;
+				$fetchMode = PDO::FETCH_NUM;
 			}
 			else
 			{
-				$fetchMode = \PDO::FETCH_ASSOC;
+				$fetchMode = PDO::FETCH_ASSOC;
 			}
 
 			if(is_array($binds))
@@ -276,7 +280,7 @@ class simple_pdo
 					if(is_int($value))
 					{
 						$value = intval($value);
-						$this->STH->bindValue($i, $value, \PDO::PARAM_INT);
+						$this->STH->bindValue($i, $value, PDO::PARAM_INT);
 					}
 					else{
 
@@ -362,7 +366,7 @@ public function request($requestString)
 
 }
 
- public function find_id()
+ public function find_id($update=false)
  {
 
      //first check if a record already exists
@@ -373,6 +377,12 @@ public function request($requestString)
     if($this->result)
     {
         $this->recordId = $this->result[$this->idColumn];
+
+        if($update === true)
+		{
+			$this->query($this->updateQuery, ['binds'=>$this->updateBinds, 'type'=>'update']);
+
+		}
 
     }
     else
@@ -438,7 +448,7 @@ public function request($requestString)
 		foreach ($result as $row)
 		{
 			$optionValue = $row[$column];
-			$optionId = $row['id'];
+			//$optionId = $row['id'];
 			if ($optionValue == $value)
 			{
 				//echo "<option selected='selected'>$optionValue</option>";

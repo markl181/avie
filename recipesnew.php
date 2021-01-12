@@ -261,7 +261,7 @@ $recipeCount = count($recipeList);
         if($recipeCount == 0)
         {
             Bootstrap4::heading("No recipes found!",2);
-            Bootstrap4::heading("If you just added a food, please wait up to 1 hour and search again",3);
+            Bootstrap4::heading("If you just added a food or recipe, please wait up to 1 hour and search again",3);
 
         }
         else
@@ -321,10 +321,6 @@ $form->select('rating','Rating: ',[3=>'Rating >=3', 4=>'Rating >=4'
 $form->selectquery('course', 'Course: ', $coursesList, 'course'
     , 'course',$course);
 $form->select('tag','Tag: ',$tagSelect, $tag);
-/*$form->select('course','Course: ',[''=>'','Appetizers'=>'Appetizers','Beverages'=>'Beverages'
-    ,'Breakfast'=>'Breakfast'
-    ,'Dessert'=>'Dessert','Main Course'=>'Main Course','Salad'=>'Salad'
-    ,'Sides'=>'Sides','Soup'=>'Soup'], $course);*/
 $form->input('redlimit','Max Red:',['type'=>'number','min'=>0,'max'=>10, 'value'=>$redLimit]);
 $form->input('greenlimit','Min Green:',['type'=>'number','min'=>0,'max'=>10, 'value'=>$greenLimit]);
 //$form->checkbox('compact','Compact View');

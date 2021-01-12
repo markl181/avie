@@ -4,5 +4,6 @@
     <inspection_tool class="PhpUndefinedVariableInspection" enabled="true" level="ERROR" enabled_by_default="true">
       <option name="IGNORE_INCLUDE" value="true" />
     </inspection_tool>
+    <inspection_tool class="SqlShadowingAliasInspection" enabled="false" level="WARNING" enabled_by_default="false" />
   </profile>
 </component>

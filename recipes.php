@@ -62,8 +62,6 @@ foreach($_GET as $key=>$item)
     //troubleshoot($filters);
 
 
-
-
     if(strpos($key,'request') !== FALSE)
     {
 
@@ -140,7 +138,7 @@ else
 {
     //default form if nothing is set
 
-    $pdo->query($sqlGetRecipesDefault);
+    $pdo->query($sqlGetRecipesDefault, ['binds'=>[$newCutoff, $updatedCutoff]]);
 
     $filters[] = 1;
 }
@@ -261,7 +259,7 @@ $recipeCount = count($recipeList);
             {
                 if($filter == 1)
                 {
-                    $text.= 'random selection of desserts/mains';
+                    $text.= 'recently added or updated recipes';
 
                 }
                 if($filter == 2)
