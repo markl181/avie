@@ -18,7 +18,9 @@ ADD `timestamp` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMES
 
 $sqlGetMeals = "SELECT id, ord, name FROM meal ORDER BY ord";
 $sqlGetFoodGroups = "SELECT id, name, ord, notes FROM food_group ORDER BY ord";
-$sqlGetFoods = "SELECT avie_food.id id, avie_food.name name, avie_level.name level FROM avie_food 
+$sqlGetFoods = "SELECT avie_food.id id, avie_food.name name, avie_level.name level 
+, maxuse, oligos, fructose, polyols, lactose 
+FROM avie_food 
 LEFT OUTER JOIN avie_level ON avie_food.level_id = avie_level.id
 ORDER BY level_id, avie_food.name";
 
@@ -39,7 +41,8 @@ LEFT OUTER JOIN avie_level ON avie_food.level_id = avie_level.id
 WHERE avie_level.name <> 'Black'
 ORDER BY avie_food.name";
 
-$sqlGetFoodById = "SELECT avie_food.id, avie_food.name name, avie_level.id level FROM avie_food 
+$sqlGetFoodById = "SELECT avie_food.id, avie_food.name name, avie_level.id level, maxuse, oligos, fructose, polyols, lactose 
+FROM avie_food 
 LEFT OUTER JOIN avie_level ON avie_food.level_id = avie_level.id
 WHERE avie_food.id = ?
 ORDER BY avie_food.name";

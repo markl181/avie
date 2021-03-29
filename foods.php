@@ -136,7 +136,7 @@ Bootstrap4::table_row(['Total',"$total"]);
 //@@todo - automate making the total row and having it as bold
 Bootstrap4::table_close();
 
-Bootstrap4::table(['Food','Level']);
+Bootstrap4::table(['Food','Level','Maxuse']);
 
 $rowClass = 'text-left clickable-row';
 
@@ -152,7 +152,12 @@ foreach($foodListAr as $food)
 
     $food['name'] = food_colour($food['name'],$food['level']);
 
-    Bootstrap4::table_row([$food['name'], $food['level']], ['class' => $rowClass, 'data-href' => $url]);
+    if($food['maxuse'] == '')
+    {
+        $food['maxuse'] = 'Non fodmap';
+    }
+
+    Bootstrap4::table_row([$food['name'], $food['level'], $food['maxuse']], ['class' => $rowClass, 'data-href' => $url]);
 
 }
 
